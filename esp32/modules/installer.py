@@ -118,12 +118,25 @@ def install_app(active):
 		ugfx.string(100,55, packages[index]["name"],"PermanentMarker22",ugfx.WHITE)
 		ugfx.flush()
 
+		latest = False
 		import woezel
 		selected_app =  packages[index]["slug"]
-		woezel.install(selected_app)
+		try:
+			woezel.install(selected_app)
+		except woezel.LatestInstalledError:
+			latest = True
+		except:
+			ugfx.string(160,85,"Failed","Roboto_BlackItalic24",ugfx.WHITE)
+			ugfx.flush()
+			time.sleep(4)
+			list_categories()
+			return
 
 		ugfx.clear(ugfx.WHITE)
-		ugfx.string(40,25,"Installed:","Roboto_BlackItalic24",ugfx.BLACK)
+		if latest:
+			ugfx.string(40,25,"Already installed:","Roboto_BlackItalic24",ugfx.BLACK)
+		else:
+			ugfx.string(40,25,"Installed:","Roboto_BlackItalic24",ugfx.BLACK)
 		ugfx.string(100,55, packages[index]["name"],"PermanentMarker22",ugfx.BLACK)
 		ugfx.string(0, 115, "[ A: START | B: BACK ]", "Roboto_Regular12", ugfx.BLACK)
 
