@@ -1,4 +1,4 @@
-import ugfx, badge, network, gc, time, urequests, appglue
+import ugfx, badge, network, gc, time, urequests, appglue, sys
 
 # SHA2017 Badge installer
 # V2 Thomas Roos
@@ -71,10 +71,19 @@ def list_apps(slug):
 	ugfx.flush(ugfx.LUT_FULL)
 
 	try:
-		f = urequests.get("https://badge.sha2017.org/eggs/category/%s/json" % slug)
-		packages = f.json()
-	finally:
-		f.close()
+		f = urequests.get("https://badge.sha2017.org/eggs/category/%s/json" % slug, timeout=30)
+		try:
+			packages = f.json()
+		finally:
+			f.close()
+	except BaseException as e:
+		print("[Installer] Failed to download list of eggs:")
+		sys.print_exception(e)
+		text.text("Download failed")
+		ugfx.flush(ugfx.LUT_FULL)
+		list_categories()
+		gc.collect()
+		return
 
 	for package in packages:
 		options.add_item("%s rev. %s" % (package["name"], package["revision"]))
@@ -145,7 +154,7 @@ def list_categories():
 		ugfx.input_init()
 		draw_msg('Getting categories')
 		try:
-			f = urequests.get("https://badge.sha2017.org/eggs/categories/json")
+			f = urequests.get("https://badge.sha2017.org/eggs/categories/json", timeout=30)
 			categories = f.json()
 		except:
 			draw_msg('Failed!')
