@@ -96,7 +96,6 @@ def list_apps(slug):
 	ugfx.input_attach(ugfx.BTN_START, lambda pushed: appglue.start_app('') if pushed else False)
 
 	show_description(True)
-	ugfx.flush(ugfx.LUT_FULL)
 	gc.collect()
 
 def start_categories(pushed):
