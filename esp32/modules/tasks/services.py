@@ -34,17 +34,17 @@ def setup(drawCb=None):
         print("APP: "+app)
         try:
             #Try to open and read the json description
-            fd = open('/lib/'+app+'/service.json')
-            description = ujson.loads(fd.read())
-            fd.close()
+            with open('/lib/'+app+'/service.json') as f:
+                description = f.read()
+            description = ujson.loads(description)
         except:
             print("[SERVICES] No description found for "+app)
             continue #Or skip the app
                 
         try:
             #Try to open the service itself
-            fd = open('/lib/'+app+'/service.py')
-            fd.close()
+            with open('/lib/'+app+'/service.py') as f:
+                f.close()
         except:
             print("[SERVICES] No script found for "+app)
             continue #Or skip the app

@@ -59,9 +59,9 @@ def read_metadata(app):
         install_path = get_install_path()
         info_file = "%s/%s/metadata.json" % (install_path, app)
         print("Reading "+info_file+"...")
-        fd = open(info_file)
-        information = ujson.loads(fd.read())
-        return information
+        with open(info_file) as f:
+            information = f.read()
+        return ujson.loads(information)
     except BaseException as e:
         print("[ERROR] Can not read metadata for app "+app)
         sys.print_exception(e)

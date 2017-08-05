@@ -21,8 +21,8 @@ def show(force=False):
         needToInstall = True
         version = 0
         try:
-            fp = open("/lib/sponsors/version", "r")
-            version = int(fp.read(99))
+            with open("/lib/sponsors/version", "r") as f:
+                version = int(f.read(99))
             print("[SPONSORS] Current version: "+str(version))
         except:
             print("[SPONSORS] Not installed!")
@@ -31,8 +31,8 @@ def show(force=False):
         if needToInstall:
             install()
         try:
-            fp = open("/lib/sponsors/version", "r")
-            version = int(fp.read(99))
+            with open("/lib/sponsors/version", "r") as f:
+                version = int(f.read(99))
             # Now we know for sure that a version of the sponsors app has been installed
             badge.nvs_set_u8('sponsors', 'shown', 1)
             appglue.start_app("sponsors")
