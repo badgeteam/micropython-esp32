@@ -18,8 +18,8 @@ def install():
 def check():
     needToInstall = True
     try:
-        fp = open("/lib/resources/version", "r")
-        version = int(fp.read(99))
+        with open("/lib/resources/version", "r") as f:
+            version = int(f.read(99))
         print("[RESOURCES] Current version: "+str(version))
         if version>=2:
             needToInstall = False
