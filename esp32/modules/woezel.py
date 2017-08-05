@@ -266,7 +266,7 @@ def install(to_install, install_path=None, force_reinstall=False):
         print("Error installing '{}': {}, packages may be partially installed".format(
                 pkg_spec, e),
             file=sys.stderr)
-	raise e
+        raise e
 
 def display_pkg(packages):
     for package in packages:
