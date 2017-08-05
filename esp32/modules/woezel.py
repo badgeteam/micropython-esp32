@@ -193,11 +193,11 @@ def install_pkg(pkg_spec, install_path, force_reinstall):
     verf = "%s%s/version" % (install_path, pkg_spec)
     if already_installed:
         try:
-            fver = open(verf, "r")
+            with open(verf, "r") as fver:
+                old_ver = fver.read()
         except:
             print("No version file found")
         else:
-            old_ver = fver.read();
             if old_ver == latest_ver:
                 if not force_reinstall:
                     raise LatestInstalledError("Latest version installed")
@@ -205,7 +205,6 @@ def install_pkg(pkg_spec, install_path, force_reinstall):
                 print("Removing previous rev. %s" % old_ver)
                 for rm_file in os.listdir("%s%s" % (install_path, pkg_spec)):
                     os.remove("%s%s/%s" % (install_path, pkg_spec, rm_file))
-            fver.close()
     packages = data["releases"][latest_ver]
     del data
     gc.collect()
@@ -222,9 +221,8 @@ def install_pkg(pkg_spec, install_path, force_reinstall):
         f1.close()
     del f3
     del f2
-    fver = open(verf, "w")
-    fver.write(latest_ver)
-    fver.close()
+    with open(verf, "w") as fver:
+        fver.write(latest_ver)
     del fver
     gc.collect()
     return meta
