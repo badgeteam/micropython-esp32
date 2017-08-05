@@ -19,8 +19,11 @@ except OSError:
 
 for app in apps:
     easydraw.msg("Updating '"+app+"'...")
-    woezel.install(app)
-    easydraw.msg("Done!")
-    
+    try:
+        woezel.install(app)
+        easydraw.msg("Done!")
+    except:
+        print("failed update. Already newest version?")
+
 easydraw.msg("All your apps are now up-to-date!")
 stop()
