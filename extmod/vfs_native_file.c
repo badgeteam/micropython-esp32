@@ -185,7 +185,7 @@ STATIC mp_obj_t file_open(fs_user_mount_t *vfs, const mp_obj_type_t *type, mp_ar
 	assert(vfs != NULL);
 	int fd = open(fname, mode_x | mode_rw, 0644);
 	if (fd == -1) {
-		ESP_LOGE(TAG, "open('%s', '%s'): error %d", fname, mode_s_orig, errno);
+		ESP_LOGI(TAG, "open('%s', '%s'): error %d", fname, mode_s_orig, errno);
 		m_del_obj(pyb_file_obj_t, o);
 		mp_raise_OSError(errno);
 	}
