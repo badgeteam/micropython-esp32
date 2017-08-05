@@ -174,7 +174,6 @@ draw(True)
 easywifi.disable()
 gc.collect()
     
-virtualtimers.debug(True)
 virtualtimers.activate(25)
 pm.callback(onSleep)
 pm.feed()
