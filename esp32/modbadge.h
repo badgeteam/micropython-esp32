@@ -13,6 +13,7 @@
 #include "badge_vibrator.h"
 #include "badge_nvs.h"
 
+#include "mem_reader.h"
 #include "file_reader.h"
 #include "png_reader.h"
 
