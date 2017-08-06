@@ -242,7 +242,7 @@ STATIC MP_DEFINE_CONST_FUN_OBJ_0(badge_mpr121_get_touch_info_obj, badge_mpr121_g
 #endif // I2C_MPR121_ADDR
 
 
-bool in_safe_mode = false;
+bool RTC_DATA_ATTR in_safe_mode = false;
 STATIC mp_obj_t badge_safe_mode() {
   return mp_obj_new_bool(in_safe_mode);
 }
