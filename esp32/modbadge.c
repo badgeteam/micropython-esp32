@@ -299,24 +299,49 @@ STATIC mp_obj_t badge_eink_png(mp_obj_t obj_x, mp_obj_t obj_y, mp_obj_t obj_file
 {
 	int x = mp_obj_get_int(obj_x);
 	int y = mp_obj_get_int(obj_y);
-	const char* filename = mp_obj_str_get_str(obj_filename);
 
 	if (x >= BADGE_EINK_WIDTH || y >= BADGE_EINK_HEIGHT)
 	{
 		return mp_const_none;
 	}
 
-	struct lib_file_reader *fr = lib_file_new(filename, 1024);
-	if (fr == NULL)
-	{
-		nlr_raise(mp_obj_new_exception_msg_varg(&mp_type_ValueError, "Could not open file '%s'!",filename));
-		return mp_const_none;
+	lib_reader_read_t reader;
+	void * reader_p;
+
+	bool is_bytes = MP_OBJ_IS_TYPE(obj_filename, &mp_type_bytes);
+
+	if (is_bytes) {
+		size_t len;
+		const uint8_t* png_data = (const uint8_t *) mp_obj_str_get_data(obj_filename, &len);
+		struct lib_mem_reader *mr = lib_mem_new(png_data, len);
+		if (mr == NULL)
+		{
+			nlr_raise(mp_obj_new_exception_msg_varg(&mp_type_ValueError, "out of memory!"));
+			return mp_const_none;
+		}
+		reader = (lib_reader_read_t) &lib_mem_read;
+		reader_p = mr;
+
+	} else {
+		const char* filename = mp_obj_str_get_str(obj_filename);
+		struct lib_file_reader *fr = lib_file_new(filename, 1024);
+		if (fr == NULL)
+		{
+			nlr_raise(mp_obj_new_exception_msg_varg(&mp_type_ValueError, "Could not open file '%s'!",filename));
+			return mp_const_none;
+		}
+		reader = (lib_reader_read_t) &lib_file_read;
+		reader_p = fr;
 	}
 
-	struct lib_png_reader *pr = lib_png_new((lib_reader_read_t) &lib_file_read, fr);
+	struct lib_png_reader *pr = lib_png_new(reader, reader_p);
 	if (pr == NULL)
 	{
-		lib_file_destroy(fr);
+		if (is_bytes) {
+			lib_mem_destroy(reader_p);
+		} else {
+			lib_file_destroy(reader_p);
+		}
 		nlr_raise(mp_obj_new_exception_msg_varg(&mp_type_ValueError, "out of memory."));
 		return mp_const_none;
 	}
@@ -325,7 +350,11 @@ STATIC mp_obj_t badge_eink_png(mp_obj_t obj_x, mp_obj_t obj_y, mp_obj_t obj_file
 	uint32_t dst_min_y = y < 0 ? -y : 0;
 	int res = lib_png_load_image(pr, &badge_eink_fb[y * BADGE_EINK_WIDTH + x], dst_min_x, dst_min_y, BADGE_EINK_WIDTH - x, BADGE_EINK_HEIGHT - y, BADGE_EINK_WIDTH);
 	lib_png_destroy(pr);
-	lib_file_destroy(fr);
+	if (is_bytes) {
+		lib_mem_destroy(reader_p);
+	} else {
+		lib_file_destroy(reader_p);
+	}
 
 	if (res < 0)
 	{
