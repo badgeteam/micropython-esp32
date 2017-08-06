@@ -26,11 +26,11 @@ def show(force=False):
             print("[SPONSORS] Current version: "+str(version))
         except:
             print("[SPONSORS] Not installed!")
-        if version>=14:
-            needToInstall = False
-        if needToInstall:
-            install()
         try:
+            if version>=16:
+                needToInstall = False
+            if needToInstall:
+                install()
             with open("/lib/sponsors/version", "r") as f:
                 version = int(f.read(99))
             # Now we know for sure that a version of the sponsors app has been installed
