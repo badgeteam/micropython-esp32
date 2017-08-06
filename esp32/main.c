@@ -102,7 +102,7 @@ soft_reset:
     // run boot-up scripts
     pyexec_frozen_module("_boot.py");
     if (pyexec_mode_kind != PYEXEC_MODE_RAW_REPL) {
-        pyexec_file("boot.py");
+        pyexec_frozen_module("boot.py");
     }
     // if (pyexec_mode_kind == PYEXEC_MODE_FRIENDLY_REPL) {
     //     pyexec_file("main.py");

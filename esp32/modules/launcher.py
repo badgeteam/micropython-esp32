@@ -166,9 +166,16 @@ def start():
     ugfx.clear(ugfx.WHITE)
     ugfx.flush()
 
-    ugfx.string_box(148,0,148,26, "STILL", "Roboto_BlackItalic24", ugfx.BLACK, ugfx.justifyCenter)
+    if badge.safe_mode():
+	still = "SAFE"
+	anyway = "Mode"
+    else:
+	still = "STILL"
+	anyway = "Anyway"
+
+    ugfx.string_box(148,0,148,26, still, "Roboto_BlackItalic24", ugfx.BLACK, ugfx.justifyCenter)
     ugfx.string_box(148,23,148,23, "Hacking", "PermanentMarker22", ugfx.BLACK, ugfx.justifyCenter)
-    ugfx.string_box(148,48,148,26, "Anyway", "Roboto_BlackItalic24", ugfx.BLACK, ugfx.justifyCenter)
+    ugfx.string_box(148,48,148,26, anyway, "Roboto_BlackItalic24", ugfx.BLACK, ugfx.justifyCenter)
 
     #the line under the text
     str_len = ugfx.get_string_width("Hacking","PermanentMarker22")

@@ -35,10 +35,18 @@ def draw(mode, goingToSleep=False):
                 info2 = 'Press select to start OTA update'
             else:
                 info2 = ''
-        l = ugfx.get_string_width(info1,"Roboto_Regular12")
-        ugfx.string(296-l, 0, info1, "Roboto_Regular12",ugfx.BLACK)
-        l = ugfx.get_string_width(info2,"Roboto_Regular12")
-        ugfx.string(296-l, 12, info2, "Roboto_Regular12",ugfx.BLACK)
+
+	def disp_string_right(y, s):
+	    l = ugfx.get_string_width(s,"Roboto_Regular12")
+	    ugfx.string(296-l, y, s, "Roboto_Regular12",ugfx.BLACK)
+
+	disp_string_right(0, info1)
+	disp_string_right(12, info2)
+
+	if badge.safe_mode():
+	    disp_string_right(92, "Safe Mode - services disabled")
+	    disp_string_right(104, "Sleep disabled - will drain battery quickly")
+	    disp_string_right(116, "Press Reset button to exit")
         
         easydraw.nickname()
         
@@ -156,7 +164,8 @@ if not easywifi.failure():
 if not easywifi.failure():
     spoc.show(False)    # Check sponsors
 
-services.setup(draw) # Start services
+if not badge.safe_mode():
+    services.setup(draw) # Start services
 
 draw(False)
 services.force_draw()
