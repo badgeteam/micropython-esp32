@@ -235,3 +235,5 @@ const mp_obj_module_t mock_badge_module = {
     .base = {&mp_type_module},
     .globals = (mp_obj_dict_t *)&mock_badge_module_globals,
 };
+
+bool ugfx_screen_flipped = false;
