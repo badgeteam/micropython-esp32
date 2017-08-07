@@ -11,14 +11,17 @@ onSleepCallback = None
 
 userResponseTime = badge.nvs_get_u16('splash', 'urt', 5000)
 
+def usb_attached():
+    return badge.usb_volt_sense() > 4500
+
 def pm_task():
     ''' The power management task [internal function] '''
     global requestedStandbyTime
     
     idleTime = virtualtimers.idle_time()
-    print("[Power management] Next task wants to run in "+str(idleTime)+" ms.")
-        
-    if idleTime>30000 and not badge.safe_mode():
+    #print("[Power management] Next task wants to run in "+str(idleTime)+" ms.")
+
+    if idleTime > 30000 and not badge.safe_mode() and not ( usb_attached() and badge.nvs_get_u8('badge', 'usb_stay_awake', 0) != 0 ):
         global onSleepCallback
         if not onSleepCallback==None:
             print("[Power management] Running onSleepCallback...")
