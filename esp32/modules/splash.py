@@ -50,12 +50,12 @@ def draw(mode, goingToSleep=False):
         
         easydraw.nickname()
         
-        vUsb = badge.usb_volt_sense()
+        on_usb = pm.usb_attached()
         vBatt = badge.battery_volt_sense()
         vBatt += vDrop
         charging = badge.battery_charge_status()
 
-        easydraw.battery(vUsb, vBatt, charging)
+        easydraw.battery(on_usb, vBatt, charging)
         
         if vBatt>500:
             ugfx.string(52, 0, str(round(vBatt/1000, 1)) + 'v','Roboto_Regular12',ugfx.BLACK)
@@ -123,7 +123,7 @@ def onSleep(idleTime):
 ### PROGRAM
 
 # Calibrate battery voltage drop
-if badge.battery_charge_status() == False and badge.usb_volt_sense() > 4500 and badge.battery_volt_sense() > 2500:
+if badge.battery_charge_status() == False and pm.usb_attached() and badge.battery_volt_sense() > 2500:
     badge.nvs_set_u16('splash', 'bat.volt.drop', 5200 - badge.battery_volt_sense()) # mV
     print('Set vDrop to: ' + str(4200 - badge.battery_volt_sense()))
 vDrop = badge.nvs_get_u16('splash', 'bat.volt.drop', 1000) - 1000 # mV
