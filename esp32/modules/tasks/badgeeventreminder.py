@@ -7,11 +7,14 @@
 import virtualtimers, time, appglue, badge
 
 # Tue Aug  8 13:30:00 2017 (CEST)
+# (warn 10 minutes before the event)
 whenToTrigger = 1502191800 - 600
 
 def ber_task():
     global whenToTrigger
-    now = time.time()
+    # braindead time.time() implementation. it's 2 hours in the
+    # future.
+    now = time.time() - 7200
     if now >= whenToTrigger and now < whenToTrigger + 600 + 3600:
         badge.nvs_set_u8('badge','evrt',1)
         print("BADGE EVENT REMINDER ACTIVATED")
