@@ -242,6 +242,11 @@ STATIC MP_DEFINE_CONST_FUN_OBJ_0(badge_mpr121_get_touch_info_obj, badge_mpr121_g
 #endif // I2C_MPR121_ADDR
 
 
+bool RTC_DATA_ATTR in_safe_mode = false;
+STATIC mp_obj_t badge_safe_mode() {
+  return mp_obj_new_bool(in_safe_mode);
+}
+STATIC MP_DEFINE_CONST_FUN_OBJ_0(badge_safe_mode_obj, badge_safe_mode);
 // E-Ink (badge_eink.h)
 
 STATIC mp_obj_t badge_eink_init_() {
@@ -681,6 +686,8 @@ STATIC const mp_rom_map_elem_t badge_module_globals_table[] = {
     {MP_OBJ_NEW_QSTR(MP_QSTR_mount_sdcard), (mp_obj_t)&badge_mount_sdcard_obj},
     {MP_OBJ_NEW_QSTR(MP_QSTR_unmount_sdcard), (mp_obj_t)&badge_unmount_sdcard_obj},
     {MP_OBJ_NEW_QSTR(MP_QSTR_mount_bpp), (mp_obj_t)&badge_mount_bpp_obj},
+
+    {MP_OBJ_NEW_QSTR(MP_QSTR_safe_mode), (mp_obj_t)&badge_safe_mode_obj},
 
 };
 

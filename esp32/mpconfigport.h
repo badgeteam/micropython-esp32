@@ -159,8 +159,7 @@
 #define MICROPY_SDMMC_USE_DRIVER            (1)
 #define MICROPY_SDMMC_SHOW_INFO             (1)
 
-// use vfs's functions for import stat and builtin open
-#define mp_import_stat mp_vfs_import_stat
+// use vfs's functions for builtin open
 #define mp_builtin_open mp_vfs_open
 #define mp_builtin_open_obj mp_vfs_open_obj
 

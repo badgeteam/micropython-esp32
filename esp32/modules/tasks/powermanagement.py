@@ -18,7 +18,7 @@ def pm_task():
     idleTime = virtualtimers.idle_time()
     print("[Power management] Next task wants to run in "+str(idleTime)+" ms.")
         
-    if idleTime>30000:
+    if idleTime>30000 and not badge.safe_mode():
         global onSleepCallback
         if not onSleepCallback==None:
             print("[Power management] Running onSleepCallback...")

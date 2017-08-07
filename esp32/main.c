@@ -35,6 +35,7 @@
 #include "esp_system.h"
 #include "esp_task.h"
 #include "soc/cpu.h"
+#include "rom/rtc.h"
 
 #include "sha2017_ota.h"
 #include "esprtcmem.h"
@@ -56,6 +57,7 @@
 #include "badge_base.h"
 #include "badge_first_run.h"
 #include <badge_input.h>
+#include <badge_button.h>
 #include <badge.h>
 
 // MicroPython runs as a task under FreeRTOS
@@ -64,11 +66,53 @@
 #define MP_TASK_STACK_LEN       (MP_TASK_STACK_SIZE / sizeof(StackType_t))
 #define MP_TASK_HEAP_SIZE       (88 * 1024)
 
+//define BUTTON_SAFE_MODE ((1 << BADGE_BUTTON_A) || (1 << BADGE_BUTTON_B))
+#define BUTTON_SAFE_MODE ((1 << BADGE_BUTTON_START))
+
 STATIC StaticTask_t mp_task_tcb;
 STATIC StackType_t mp_task_stack[MP_TASK_STACK_LEN] __attribute__((aligned (8)));
 STATIC uint8_t mp_task_heap[MP_TASK_HEAP_SIZE];
 
 extern uint32_t reset_cause;
+extern bool in_safe_mode;
+
+static const char *import_blacklist[] = {
+	"/lib/json",
+	"/lib/os",
+	"/lib/socket",
+	"/lib/struct",
+	"/lib/time",
+};
+
+mp_import_stat_t
+mp_import_stat(const char *path) {
+	if (in_safe_mode) {
+		// be more strict in which modules we would like to load
+		if (strncmp(path, "/lib/", 5) != 0) {
+			return MP_IMPORT_STAT_NO_EXIST;
+		}
+
+		/* check blacklist */
+		int i;
+		for (i=0; i<sizeof(import_blacklist)/sizeof(const char *); i++) {
+			if (strcmp(path, import_blacklist[i]) == 0) {
+				return MP_IMPORT_STAT_NO_EXIST;
+			}
+		}
+
+		const char *x = index(&path[5], '/');
+		if (x == NULL) {
+			// only allow directories
+			mp_import_stat_t res = mp_vfs_import_stat(path);
+			if (res != MP_IMPORT_STAT_DIR) {
+				return MP_IMPORT_STAT_NO_EXIST;
+			}
+			return res;
+		}
+	}
+
+    return mp_vfs_import_stat(path);
+}
 
 void mp_task(void *pvParameter) {
     volatile uint32_t sp = (uint32_t)get_sp();
@@ -96,7 +140,7 @@ soft_reset:
     // run boot-up scripts
     pyexec_frozen_module("_boot.py");
     if (pyexec_mode_kind != PYEXEC_MODE_RAW_REPL) {
-        pyexec_file("boot.py");
+        pyexec_frozen_module("boot.py");
     }
     // if (pyexec_mode_kind == PYEXEC_MODE_FRIENDLY_REPL) {
     //     pyexec_file("main.py");
@@ -176,6 +220,13 @@ void app_main(void) {
 		}
 
 	} else {
+		uint32_t reset_cause = rtc_get_reset_reason(0);
+		if (reset_cause != DEEPSLEEP_RESET) {
+			badge_init();
+			if ((badge_input_button_state & BUTTON_SAFE_MODE) == BUTTON_SAFE_MODE) {
+				in_safe_mode = true;
+			}
+		}
 		xTaskCreateStaticPinnedToCore(mp_task, "mp_task", MP_TASK_STACK_LEN, NULL, MP_TASK_PRIORITY,
 				&mp_task_stack[0], &mp_task_tcb, 0);
 	}
