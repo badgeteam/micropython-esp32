@@ -1,8 +1,6 @@
 import badge, easydraw
 
 def u0to1():
-    import create
-    create.boot()
     easydraw.msg("Applied patch 1")
 
 def u1to2():

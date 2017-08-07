@@ -1,16 +1,13 @@
-import uos
-
-def boot():
-    print("Updating 'boot.py'...")
-    with open("/boot.py", "w") as f:
-            f.write("""\
 # This file is executed on every boot (including wake-boot from deepsleep)
 import badge, machine, esp, ugfx, sys
 badge.init()
 ugfx.init()
 esp.rtcmem_write(0,0)
 esp.rtcmem_write(1,0)
-splash = badge.nvs_get_str('boot','splash','splash')
+if badge.safe_mode():
+    splash = 'splash'
+else:
+    splash = badge.nvs_get_str('boot','splash','splash')
 if machine.reset_cause() != machine.DEEPSLEEP_RESET:
     print('[BOOT] Cold boot')
 else:
@@ -39,4 +36,3 @@ except BaseException as e:
     time.sleep(5)
     import appglue
     appglue.home()
-    """)
