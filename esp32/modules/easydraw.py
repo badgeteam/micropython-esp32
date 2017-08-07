@@ -39,15 +39,15 @@ def nickname(y = 25, font = "PermanentMarker36", color = ugfx.BLACK):
     nick = badge.nvs_get_str("owner", "name", 'Henk de Vries')
     ugfx.string_box(0,y,296,38, nick, font, color, ugfx.justifyCenter)
 
-def battery(vUsb, vBatt, charging):
+def battery(on_usb, vBatt, charging):
     vMin = badge.nvs_get_u16('batt', 'vmin', 3500) # mV
     vMax = badge.nvs_get_u16('batt', 'vmax', 4100) # mV
-    if charging and vUsb>4000:
+    if charging and on_usb:
         try:
             badge.eink_png(0,0,'/lib/resources/chrg.png')
         except:
             ugfx.string(0, 0, "CHRG",'Roboto_Regular12',ugfx.BLACK)
-    elif vUsb>4000:
+    elif on_usb:
         try:
             badge.eink_png(0,0,'/lib/resources/usb.png')
         except:
