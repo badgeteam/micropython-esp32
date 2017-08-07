@@ -59,7 +59,10 @@
 #define imgSize (BADGE_EINK_WIDTH*BADGE_EINK_HEIGHT)
 static uint8_t* img = 0;
 
-#define PX(x,y,v) img[((x)+(y)*BADGE_EINK_WIDTH)] = (v)
+#define PX(x,y,v) \
+	if( x>=0 && y>=0 && x < BADGE_EINK_WIDTH && y < BADGE_EINK_HEIGHT) \
+		img[((x)+(y)*BADGE_EINK_WIDTH)] = (v)
+
 #define ABS(x) (((x)<0)?-(x):(x))
 
 static void gfx_input_poll(uint32_t btn);
