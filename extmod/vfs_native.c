@@ -33,6 +33,21 @@ int
 chdir(const char *path)
 {
 	struct stat buf;
+
+	// root mount-point is special-case.
+	if (strcmp(path, "/") == 0) {
+		cwd[0] = 0;
+		ESP_LOGD(TAG, "cwd set to '/'");
+		return 0;
+	}
+
+	// other mount-points are special as well.
+	if (strcmp(path, "/sdcard") == 0 || strcmp(path, "/bpp") == 0) {
+		strncpy(cwd, path, sizeof(cwd));
+		ESP_LOGD(TAG, "cwd set to '%s'", cwd);
+		return 0;
+	}
+
 	int res = stat(path, &buf);
 	if (res < 0) {
 		return -1;
