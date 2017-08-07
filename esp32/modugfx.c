@@ -62,6 +62,7 @@ uint8_t target_lut;
 
 typedef struct _ugfx_obj_t { mp_obj_base_t base; } ugfx_obj_t;
 
+extern bool ugfx_screen_flipped;
 static orientation_t get_orientation(int a){
 	if (a == 90)
 		return GDISP_ROTATE_90;
@@ -146,11 +147,19 @@ STATIC MP_DEFINE_CONST_FUN_OBJ_0(ugfx_get_lut_obj, ugfx_get_lut);
 STATIC mp_obj_t ugfx_set_orientation(mp_uint_t n_args, const mp_obj_t *args) {
 	if (n_args > 0){
 		int a = mp_obj_get_int(args[0]);
+		a %= 360;
+		if (a >= 180) {
+			ugfx_screen_flipped = true;
+			a -= 180;
+		}
 		gdispSetOrientation(get_orientation(a));
-
 	}
 
-    return mp_obj_new_int(gdispGetOrientation());
+	int a = gdispGetOrientation();
+	if (ugfx_screen_flipped)
+		a += 180;
+	a %= 360;
+    return mp_obj_new_int(a);
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(ugfx_set_orientation_obj, 0, 1, ugfx_set_orientation);
 
