@@ -12,12 +12,12 @@ whenToTrigger = 1502191800 - 600
 def ber_task():
     global whenToTrigger
     now = time.time()
-    if now>=whenToTrigger:
+    if now >= whenToTrigger and now < whenToTrigger + 600 + 3600:
         badge.nvs_set_u8('badge','evrt',1)
         print("BADGE EVENT REMINDER ACTIVATED")
         appglue.start_app("badge_event_reminder")
     idleFor = whenToTrigger - now
-    if idleFor<0:
+    if idleFor < 0:
         idleFor = 0
     return idleFor * 1000
 
