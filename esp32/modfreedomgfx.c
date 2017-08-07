@@ -35,6 +35,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdint.h>
+#include <stdbool.h>
 #include <string.h>
 
 #include <badge_eink.h>
@@ -58,16 +59,14 @@
 #define imgSize (BADGE_EINK_WIDTH*BADGE_EINK_HEIGHT)
 static uint8_t* img = 0;
 
-#define PXb(x,y) img[((x)+(y)*BADGE_EINK_WIDTH)] = 0x00
-#define PXw(x,y) img[((x)+(y)*BADGE_EINK_WIDTH)] = 0xff
+#define PX(x,y,v) img[((x)+(y)*BADGE_EINK_WIDTH)] = (v)
 #define ABS(x) (((x)<0)?-(x):(x))
 
 static void gfx_input_poll(uint32_t btn);
 
 STATIC mp_obj_t gfx_init(void) {
 	img = freedomgfxInit();
-	for(int i = 0; i < imgSize; i++)
-		img[i] = 0xff;
+	memset(img, 0xff, imgSize);
 	freedomgfxDraw();
 	return mp_const_none;
 }
@@ -93,7 +92,7 @@ STATIC mp_obj_t gfx_line(mp_uint_t n_args, const mp_obj_t *args) {
 	int y1 = mp_obj_get_int(args[3]);
 	int col = mp_obj_get_int(args[4]);
 
-	PXb(x0,y0);
+	PX(x0,y0,col);
 
 	// algorithm: https://de.wikipedia.org/wiki/Bresenham-Algorithmus
 	int dx =  ABS(x1-x0);
@@ -104,7 +103,7 @@ STATIC mp_obj_t gfx_line(mp_uint_t n_args, const mp_obj_t *args) {
 	int err2;
 
 	while(1){
-		if(col == 0) PXb(x0,y0); else PXw(x0,y0);
+		PX(x0,y0,col);
 		if ((x0 == x1) && (y0 == y1))
 			break;
 		err2 = 2*err;
@@ -134,12 +133,7 @@ STATIC mp_obj_t gfx_area(mp_uint_t n_args, const mp_obj_t *args) {
   for(int i = 0; i < a; i++)
   {
 	  for(int j = 0; j < b; j++)
-	  {
-		  if(col == 0)
-			  PXb(x0+i,y0+j);
-		  else
-			  PXw(x0+i,y0+j);
-	  }
+		  PX(x0+i,y0+j,col);
   }
 
   return mp_const_none;
@@ -171,12 +165,7 @@ STATIC mp_obj_t gfx_string(mp_uint_t n_args, const mp_obj_t *args) {
 		  for(int j = 0; j < cwidth; j++) // TODO: only works for single byte rows
 		  {
 			  if( font[4*8+(int)(*data)*clen+i] & (1<<(7-j)))
-			  {
-				  if(col == 0)
-					  PXb(x0+j+xoffs,y0+i);
-				  else
-					  PXw(x0+j+xoffs,y0+i);
-			  }
+				  PX(x0+j+xoffs,y0+i,col);
 		  }
 	  }
 	  data++;
@@ -204,7 +193,7 @@ STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(gfx_flush_obj, 0, 1, gfx_flush);
 
 // callback system
 
-STATIC uint8_t button_init_done = 0;
+STATIC bool button_init_done = false;
 STATIC mp_obj_t button_callbacks[1+BADGE_BUTTONS];
 
 static void gfx_input_poll(uint32_t btn)
@@ -220,14 +209,15 @@ STATIC mp_obj_t gfx_input_init(mp_uint_t n_args, const mp_obj_t *args) {
 	for(size_t i = 0; i <= BADGE_BUTTONS; i++){
 		button_callbacks[i] = mp_const_none;
 	}
-	button_init_done = 1;
+	button_init_done = true;
 	return mp_const_none;
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(gfx_input_init_obj, 0, 1, gfx_input_init);
 
 STATIC mp_obj_t gfx_input_attach(mp_uint_t n_args, const mp_obj_t *args) {
-  uint8_t button = mp_obj_get_int(args[0]);
-  button_callbacks[button] = args[1];
+  int button = mp_obj_get_int(args[0]);
+  if(button > 0 && button <= BADGE_BUTTONS)
+	  button_callbacks[button] = args[1];
   return mp_const_none;
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(gfx_input_attach_obj, 2, 2, gfx_input_attach);
@@ -250,8 +240,8 @@ STATIC const mp_rom_map_elem_t freedomgfx_module_globals_table[] = {
 	{MP_OBJ_NEW_QSTR(MP_QSTR_input_init), (mp_obj_t)&gfx_input_init_obj},
 	{MP_OBJ_NEW_QSTR(MP_QSTR_input_attach), (mp_obj_t)&gfx_input_attach_obj},
 
-    {MP_OBJ_NEW_QSTR(MP_QSTR_BLACK), MP_OBJ_NEW_SMALL_INT(0)},
-    {MP_OBJ_NEW_QSTR(MP_QSTR_WHITE), MP_OBJ_NEW_SMALL_INT(1)},
+    {MP_OBJ_NEW_QSTR(MP_QSTR_BLACK), MP_OBJ_NEW_SMALL_INT(0x00)},
+    {MP_OBJ_NEW_QSTR(MP_QSTR_WHITE), MP_OBJ_NEW_SMALL_INT(0xff)},
 
     {MP_OBJ_NEW_QSTR(MP_QSTR_JOY_UP), MP_OBJ_NEW_SMALL_INT(BADGE_BUTTON_UP)},
     {MP_OBJ_NEW_QSTR(MP_QSTR_JOY_DOWN), MP_OBJ_NEW_SMALL_INT(BADGE_BUTTON_DOWN)},
