@@ -162,6 +162,8 @@ SRC_C = \
 	ugfx_styles.c \
 	rom/tjpgd.c \
 	modugfx.c \
+	modfreedomgfx.c \
+	modfreedomgfx_sdl.c \
 	modnetwork.c \
 	modbadge.c \
 	../../ugfx/drivers/multiple/SDL/gdisp_lld_SDL.c \

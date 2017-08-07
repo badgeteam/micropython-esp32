@@ -179,6 +179,7 @@ extern const struct _mp_obj_module_t mp_module_jni;
 extern const struct _mp_obj_module_t mock_esp_network_module;
 extern const struct _mp_obj_module_t mock_badge_module;
 extern const struct _mp_obj_module_t ugfx_module;
+extern const struct _mp_obj_module_t freedomgfx_module;
 
 #if MICROPY_PY_UOS_VFS
 #define MICROPY_PY_UOS_VFS_DEF { MP_ROM_QSTR(MP_QSTR_uos_vfs), MP_ROM_PTR(&mp_module_uos_vfs) },
@@ -227,6 +228,7 @@ extern const struct _mp_obj_module_t ugfx_module;
     MICROPY_PY_USELECT_DEF \
     MICROPY_PY_TERMIOS_DEF \
     { MP_OBJ_NEW_QSTR(MP_QSTR_ugfx), (mp_obj_t)&ugfx_module }, \
+    { MP_OBJ_NEW_QSTR(MP_QSTR_freedomgfx), (mp_obj_t)&freedomgfx_module }, \
     { MP_OBJ_NEW_QSTR(MP_QSTR_network), (mp_obj_t)&mock_esp_network_module }, \
     { MP_OBJ_NEW_QSTR(MP_QSTR_badge), (mp_obj_t)&mock_badge_module }, \
 

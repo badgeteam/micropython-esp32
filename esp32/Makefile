@@ -165,6 +165,8 @@ SRC_C = \
 	modbpp.c \
 	modbadge.c \
 	modugfx.c \
+	modfreedomgfx.c \
+	modfreedomgfx_eink.c \
 	moduhashlib.c \
 	machine_rtc.c \
 	machine_hw_spi.c \
