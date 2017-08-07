@@ -6,7 +6,8 @@
 
 import virtualtimers, time, appglue, badge
 
-whenToTrigger = 1502196900 - 600
+# Tue Aug  8 13:30:00 2017 (CEST)
+whenToTrigger = 1502191800 - 600
 
 def ber_task():
     global whenToTrigger
