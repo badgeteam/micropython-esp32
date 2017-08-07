@@ -26,10 +26,13 @@
 
 #include "modfreedomgfx_eink.h"
 #include <badge_eink.h>
+#include <badge_eink_fb.h>
 
-void freedomgfxInit(void)
+
+uint8_t* freedomgfxInit(void)
 {
-	//
+	badge_eink_fb_init();
+	return badge_eink_fb;
 }
 
 void freedomgfxDeinit(void)
@@ -43,7 +46,7 @@ uint32_t freedomgfxPoll(void)
 	return btn;
 }
 
-void freedomgfxDraw(uint8_t* img)
+void freedomgfxDraw()
 {
-	badge_eink_display(img, DISPLAY_FLAG_FULL_UPDATE);
+	badge_eink_display(badge_eink_fb, DISPLAY_FLAG_FULL_UPDATE | DISPLAY_FLAG_8BITPIXEL);
 }

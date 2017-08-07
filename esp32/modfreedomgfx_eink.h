@@ -29,9 +29,9 @@
 
 #include <inttypes.h>
 
-void freedomgfxInit(void);
+uint8_t* freedomgfxInit(void); // returns buffer to draw to
 void freedomgfxDeinit(void);
 uint32_t freedomgfxPoll(void);
-void freedomgfxDraw(uint8_t* img);
+void freedomgfxDraw();
 
 #endif /* UNIX_MODFREEDOMGFX_SDL_H_ */

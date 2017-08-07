@@ -37,14 +37,16 @@
 #include <stdint.h>
 #include <string.h>
 
-#include "modfreedomgfx.h"
-
 #include <badge_eink.h>
 #include <badge_button.h>
 #include <badge_input.h>
 
+
 #include "py/mperrno.h"
 #include "py/mphal.h"
+#include "py/runtime.h"
+
+#include "py/nlr.h"
 #include "py/runtime.h"
 
 #ifdef UNIX
@@ -53,20 +55,20 @@
 #include "modfreedomgfx_eink.h"
 #endif
 
-#define imgSize ((BADGE_EINK_WIDTH*BADGE_EINK_HEIGHT)/8)
-uint8_t img[imgSize];
+#define imgSize (BADGE_EINK_WIDTH*BADGE_EINK_HEIGHT)
+static uint8_t* img = 0;
 
-#define PXb(x,y) img[((x)+(y)*BADGE_EINK_WIDTH)/8] &= ~(1<<(((x)+(y)*BADGE_EINK_WIDTH)%8))
-#define PXw(x,y) img[((x)+(y)*BADGE_EINK_WIDTH)/8] |= (1<<(((x)+(y)*BADGE_EINK_WIDTH)%8))
+#define PXb(x,y) img[((x)+(y)*BADGE_EINK_WIDTH)] = 0x00
+#define PXw(x,y) img[((x)+(y)*BADGE_EINK_WIDTH)] = 0xff
 #define ABS(x) (((x)<0)?-(x):(x))
 
 static void gfx_input_poll(uint32_t btn);
 
 STATIC mp_obj_t gfx_init(void) {
+	img = freedomgfxInit();
 	for(int i = 0; i < imgSize; i++)
 		img[i] = 0xff;
-	freedomgfxInit();
-	freedomgfxDraw(img);
+	freedomgfxDraw();
 	return mp_const_none;
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_0(gfx_init_obj, gfx_init);
@@ -129,7 +131,6 @@ STATIC mp_obj_t gfx_area(mp_uint_t n_args, const mp_obj_t *args) {
   int b = mp_obj_get_int(args[3]);
   int col = mp_obj_get_int(args[4]);
 
-  printf("x0=%d,y0=%d\n", x0, y0);
   for(int i = 0; i < a; i++)
   {
 	  for(int j = 0; j < b; j++)
@@ -195,7 +196,7 @@ STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(gfx_string_obj, 5, 5, gfx_string);
 
 
 STATIC mp_obj_t gfx_flush(mp_uint_t n_args, const mp_obj_t *args) {
-	freedomgfxDraw(img);
+	freedomgfxDraw();
 	return mp_const_none;
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(gfx_flush_obj, 0, 1, gfx_flush);

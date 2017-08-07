@@ -34,12 +34,15 @@ SDL_Window* win;
 SDL_Renderer* ren;
 SDL_Texture* tex;
 
-void freedomgfxInit(void)
+static uint8_t img[BADGE_EINK_WIDTH*BADGE_EINK_HEIGHT];
+
+uint8_t* freedomgfxInit(void)
 {
 	SDL_Init(SDL_INIT_VIDEO);
 	win = SDL_CreateWindow("Freedom GFX", 100, 100, BADGE_EINK_WIDTH, BADGE_EINK_HEIGHT, SDL_WINDOW_SHOWN);
 	ren = SDL_CreateRenderer(win, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 	tex = SDL_CreateTexture(ren, SDL_PIXELFORMAT_RGB332, SDL_TEXTUREACCESS_STREAMING, BADGE_EINK_WIDTH, BADGE_EINK_HEIGHT);
+	return img;
 }
 
 void freedomgfxDeinit(void)
@@ -80,13 +83,13 @@ uint32_t freedomgfxPoll(void)
 	return 0;
 }
 
-void freedomgfxDraw(uint8_t* img)
+void freedomgfxDraw()
 {
 	uint8_t* px;
 	int pitch;
 	SDL_LockTexture(tex,0,(void**)&px,&pitch);
 	for(int i = 0; i < BADGE_EINK_WIDTH*BADGE_EINK_HEIGHT; i++)
-		px[i] = (img[i/8] & (1<<(i%8)))?0xff:0x00;
+		px[i] = img[i];
 	SDL_UnlockTexture(tex);
 	SDL_RenderCopy(ren,tex,0,0);
 	SDL_RenderPresent(ren);
