@@ -19,7 +19,7 @@ def ber_task():
     idleFor = whenToTrigger - now
     if idleFor<0:
         idleFor = 0
-    return idleFor
+    return idleFor * 1000
 
 def enable():
     if badge.nvs_get_u8('badge','evrt',0)==0:
