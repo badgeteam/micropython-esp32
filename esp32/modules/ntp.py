@@ -1,7 +1,6 @@
 ### Description: Update the badge's time via NTP
 ### License: MIT
 
-import database
 import socket
 
 NTP_DELTA = 2208988800
@@ -42,14 +41,6 @@ def set_NTP_time():
 	if t is None:
 		print("Could not set time from NTP")
 		return False
-
-	tz = 0
-	with database.Database() as db:
-		tz = db.get("timezone", 200) # default to CEST
-
-	tz_minutes = int(abs(tz) % 100) * (1 if tz >= 0 else -1)
-	tz_hours = int(tz / 100)
-	t += (tz_hours * 3600) + (tz_minutes * 60)
 
 	tm = time.localtime(t)
 	tm = tm[0:3] + (0,) + tm[3:6] + (0,)

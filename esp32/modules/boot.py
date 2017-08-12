@@ -1,9 +1,15 @@
 # This file is executed on every boot (including wake-boot from deepsleep)
-import badge, machine, esp, ugfx, sys
+import badge, machine, esp, ugfx, sys, time
 badge.init()
 ugfx.init()
+
 esp.rtcmem_write(0,0)
 esp.rtcmem_write(1,0)
+
+# setup timezone
+timezone = badge.nvs_get_str('system', 'timezone', 'CET-1CEST-2,M3.5.0/02:00:00,M10.5.0/03:00:00')
+time.settimezone(timezone)
+
 if badge.safe_mode():
     splash = 'splash'
 else:
