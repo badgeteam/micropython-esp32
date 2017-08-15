@@ -144,7 +144,7 @@ STATIC mp_obj_t gfx_area(mp_uint_t n_args, const mp_obj_t *args) {
 STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(gfx_area_obj, 5, 5, gfx_area);
 
 
-static uint8_t tm12x6_font[] = {
+static const uint8_t tm12x6_font[] = {
 #include "../share/fonts/Lat2-Terminus12x6.inc"
 };
 
@@ -155,7 +155,7 @@ STATIC mp_obj_t gfx_string(mp_uint_t n_args, const mp_obj_t *args) {
   int y0 = mp_obj_get_int(args[1]);
   int col = mp_obj_get_int(args[4]);
 
-  uint8_t* font = tm12x6_font;
+  const uint8_t* font = tm12x6_font;
   int clen = ((int*)font)[5];
   int cheight = ((int*)font)[6];
   int cwidth = ((int*)font)[7];
