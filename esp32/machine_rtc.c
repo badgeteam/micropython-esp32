@@ -35,7 +35,6 @@
 #include "py/obj.h"
 #include "py/runtime.h"
 #include "py/mphal.h"
-#include "timeutils.h"
 #include "modmachine.h"
 #include "machine_rtc.h"
 
@@ -85,11 +84,10 @@ STATIC mp_obj_t machine_rtc_datetime_helper(mp_uint_t n_args, const mp_obj_t *ar
         // Get time
 
         struct timeval tv;
-        struct tm tm;
-
         gettimeofday(&tv, NULL);
 
-        gmtime_r(&tv.tv_sec, &tm);
+        struct tm tm;
+        localtime_r(&tv.tv_sec, &tm);
 
         mp_obj_t tuple[8] = {
             mp_obj_new_int(tm.tm_year + 1900),
@@ -108,19 +106,22 @@ STATIC mp_obj_t machine_rtc_datetime_helper(mp_uint_t n_args, const mp_obj_t *ar
 
         mp_obj_t *items;
         mp_obj_get_array_fixed_n(args[1], 8, &items);
-        struct tm tm;
-        struct timeval tv;
 
-        tm.tm_year  = mp_obj_get_int(items[0]) - 1900;
-        tm.tm_mon   = mp_obj_get_int(items[1]) - 1;
-        tm.tm_mday  = mp_obj_get_int(items[2]);
-        tm.tm_hour  = mp_obj_get_int(items[4]);
-        tm.tm_min   = mp_obj_get_int(items[5]);
-        tm.tm_sec   = mp_obj_get_int(items[6]);
+        struct tm tm = {
+            .tm_year  = mp_obj_get_int(items[0]) - 1900,
+            .tm_mon   = mp_obj_get_int(items[1]) - 1,
+            .tm_mday  = mp_obj_get_int(items[2]),
+            .tm_hour  = mp_obj_get_int(items[4]),
+            .tm_min   = mp_obj_get_int(items[5]),
+            .tm_sec   = mp_obj_get_int(items[6]),
+            .tm_isdst = -1,
+        };
+        time_t t = mktime(&tm);
 
-        tv.tv_sec   = mktime(&tm);
-        tv.tv_usec  = mp_obj_get_int(items[7]);
-
+        struct timeval tv = {
+            .tv_sec   = t,
+            .tv_usec  = mp_obj_get_int(items[7]),
+        };
         settimeofday(&tv, NULL);
 
         return mp_const_none;

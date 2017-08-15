@@ -32,7 +32,6 @@
 #include <sys/time.h>
 
 #include "extmod/utime_mphal.h"
-#include "lib/timeutils/timeutils.h"
 #include "py/nlr.h"
 
 /// \function localtime([secs])
@@ -57,7 +56,7 @@ STATIC mp_obj_t time_localtime(mp_uint_t n_args, const mp_obj_t *args) {
     } else {
       tv.tv_sec = mp_obj_get_int(args[0]);
     }
-    gmtime_r(&tv.tv_sec, &tm);
+    localtime_r(&tv.tv_sec, &tm);
     tuple[0] = mp_obj_new_int(tm.tm_year + 1900);
     tuple[1] = mp_obj_new_int(tm.tm_mon + 1);
     tuple[2] = mp_obj_new_int(tm.tm_mday);
@@ -84,15 +83,23 @@ STATIC mp_obj_t time_mktime(mp_obj_t tuple) {
         nlr_raise(mp_obj_new_exception_msg_varg(&mp_type_TypeError, "mktime needs a tuple of length 8 or 9 (%d given)", len));
     }
 
-    return mp_obj_new_int_from_uint(timeutils_mktime_epoch(mp_obj_get_int(elem[0]),
-            mp_obj_get_int(elem[1]), mp_obj_get_int(elem[2]), mp_obj_get_int(elem[3]),
-            mp_obj_get_int(elem[4]), mp_obj_get_int(elem[5])));
+    struct tm tm = {
+        .tm_year  = mp_obj_get_int(elem[0]) - 1900,
+        .tm_mon   = mp_obj_get_int(elem[1]) - 1,
+        .tm_mday  = mp_obj_get_int(elem[2]),
+        .tm_hour  = mp_obj_get_int(elem[3]),
+        .tm_min   = mp_obj_get_int(elem[4]),
+        .tm_sec   = mp_obj_get_int(elem[5]),
+        .tm_isdst = ((len > 8) ? mp_obj_get_int(elem[8]) : -1),
+    };
+    time_t t = mktime(&tm);
+    return mp_obj_new_int_from_uint(t);
 }
 MP_DEFINE_CONST_FUN_OBJ_1(time_mktime_obj, time_mktime);
 
 
 /// \function time()
-/// Returns the number of seconds, as an integer, since 1/1/2000.
+/// Returns the number of seconds since the unix epoch.
 STATIC mp_obj_t time_time(void) {
     struct timeval tv;
     gettimeofday(&tv, NULL);
@@ -100,11 +107,22 @@ STATIC mp_obj_t time_time(void) {
 }
 MP_DEFINE_CONST_FUN_OBJ_0(time_time_obj, time_time);
 
+/// \function settimezone(tz)
+/// Sets the timezone to tz.
+STATIC mp_obj_t time_settimezone(mp_obj_t _timezone) {
+    const char *timezone = mp_obj_str_get_str(_timezone);
+    setenv("TZ", timezone, 1);
+    tzset();
+    return mp_const_none;
+}
+STATIC MP_DEFINE_CONST_FUN_OBJ_1(time_settimezone_obj, time_settimezone);
+
 STATIC const mp_rom_map_elem_t time_module_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR___name__), MP_ROM_QSTR(MP_QSTR_utime) },
     { MP_ROM_QSTR(MP_QSTR_localtime), MP_ROM_PTR(&time_localtime_obj) },
     { MP_ROM_QSTR(MP_QSTR_mktime), MP_ROM_PTR(&time_mktime_obj) },
     { MP_ROM_QSTR(MP_QSTR_time), MP_ROM_PTR(&time_time_obj) },
+    { MP_ROM_QSTR(MP_QSTR_settimezone), MP_ROM_PTR(&time_settimezone_obj) },
     { MP_ROM_QSTR(MP_QSTR_sleep), MP_ROM_PTR(&mp_utime_sleep_obj) },
     { MP_ROM_QSTR(MP_QSTR_sleep_ms), MP_ROM_PTR(&mp_utime_sleep_ms_obj) },
     { MP_ROM_QSTR(MP_QSTR_sleep_us), MP_ROM_PTR(&mp_utime_sleep_us_obj) },
