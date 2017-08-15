@@ -14,6 +14,7 @@ if badge.safe_mode():
     splash = 'splash'
 else:
     splash = badge.nvs_get_str('boot','splash','splash')
+
 if machine.reset_cause() != machine.DEEPSLEEP_RESET:
     print('[BOOT] Cold boot')
 else:
@@ -23,6 +24,7 @@ else:
         splash = load_me
         print("starting %s" % load_me)
         esp.rtcmem_write_string("")
+
 try:
     if not splash=="shell":
         __import__(splash)
@@ -30,6 +32,11 @@ try:
         ugfx.clear(ugfx.WHITE)
         ugfx.flush(ugfx.LUT_FULL)
 except BaseException as e:
+    # if we started the splash screen and it is not the default splash screen,
+    # then revert to original splash screen.
+    if splash == badge.nvs_get_str('boot', 'splash', 'splash') and splash != 'splash':
+        badge.nvs_erase_key('boot', 'splash')
+
     sys.print_exception(e)
     import easydraw
     easydraw.msg("A fatal error occured!","Still Crashing Anyway", True)
