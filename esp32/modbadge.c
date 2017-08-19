@@ -38,6 +38,7 @@
 
 #include "bpp_init.h"
 
+#include "badge_i2c.h"
 #include "badge_mpr121.h"
 
 #include "py/mperrno.h"
@@ -211,6 +212,69 @@ STATIC mp_obj_t badge_nvs_set_u16_(mp_obj_t _namespace, mp_obj_t _key, mp_obj_t 
   return mp_const_none;
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_3(badge_nvs_set_u16_obj, badge_nvs_set_u16_);
+
+
+// I2C (badge_i2c.h)
+STATIC mp_obj_t badge_i2c_read_reg_(mp_obj_t _addr, mp_obj_t _reg, mp_obj_t _len) {
+	int addr = mp_obj_get_int(_addr);
+	int reg  = mp_obj_get_int(_reg);
+	int len  = mp_obj_get_int(_len);
+
+	if (addr < 0 || addr > 127) {
+		mp_raise_msg(&mp_type_AttributeError, "I2C address out of range");
+	}
+
+	if (reg < 0 || reg > 255) {
+		mp_raise_msg(&mp_type_AttributeError, "I2C register out of range");
+	}
+
+	if (len < 0) {
+		mp_raise_msg(&mp_type_AttributeError, "requested negative amount of bytes");
+	}
+
+	vstr_t vstr;
+	vstr_init_len(&vstr, len);
+
+	esp_err_t res = badge_i2c_read_reg(addr, reg, (uint8_t *) vstr.buf, len);
+	if (res != ESP_OK) {
+		mp_raise_OSError(MP_EIO);
+	}
+
+	return mp_obj_new_str_from_vstr(&mp_type_bytes, &vstr);
+}
+STATIC MP_DEFINE_CONST_FUN_OBJ_3(badge_i2c_read_reg_obj, badge_i2c_read_reg_);
+
+STATIC mp_obj_t badge_i2c_write_reg_(mp_obj_t _addr, mp_obj_t _reg, mp_obj_t _data) {
+	int addr = mp_obj_get_int(_addr);
+	int reg  = mp_obj_get_int(_reg);
+	mp_uint_t data_len;
+	uint8_t *data = (uint8_t *) mp_obj_str_get_data(_data, &data_len);
+
+	if (addr < 0 || addr > 127) {
+		mp_raise_msg(&mp_type_AttributeError, "I2C address out of range");
+	}
+
+	if (reg < 0 || reg > 255) {
+		mp_raise_msg(&mp_type_AttributeError, "I2C register out of range");
+	}
+
+	bool is_bytes = MP_OBJ_IS_TYPE(_data, &mp_type_bytes);
+	if (!is_bytes) {
+		mp_raise_msg(&mp_type_AttributeError, "Data should be a bytestring");
+	}
+
+	if (data_len != 1) {
+		mp_raise_msg(&mp_type_AttributeError, "Data-lengths other than 1 byte are not supported");
+	}
+
+	esp_err_t res = badge_i2c_write_reg(addr, reg, data[0]);
+	if (res != ESP_OK) {
+		mp_raise_OSError(MP_EIO);
+	}
+
+	return mp_const_none;
+}
+STATIC MP_DEFINE_CONST_FUN_OBJ_3(badge_i2c_write_reg_obj, badge_i2c_write_reg_);
 
 
 // Mpr121 (badge_mpr121.h)
@@ -696,6 +760,10 @@ STATIC const mp_rom_map_elem_t badge_module_globals_table[] = {
     {MP_ROM_QSTR(MP_QSTR___name__), MP_ROM_QSTR(MP_QSTR_badge)},
 
     {MP_ROM_QSTR(MP_QSTR_init), MP_ROM_PTR(&badge_init_obj)},
+
+    // I2C
+    {MP_ROM_QSTR(MP_QSTR_i2c_read_reg), MP_ROM_PTR(&badge_i2c_read_reg_obj)},
+    {MP_ROM_QSTR(MP_QSTR_i2c_write_reg), MP_ROM_PTR(&badge_i2c_write_reg_obj)},
 
     // Mpr121
 #ifdef I2C_MPR121_ADDR
