@@ -28,3 +28,5 @@
 
 // Entries for sys.path
 Q(/lib)
+Q(/bpp/lib)
+Q(/sdcard/lib)
