@@ -213,10 +213,10 @@ void app_main(void) {
 					printf("Starting bpp.\n");
 					do_bpp_bgnd();
 				} else {
-          printf("Touch wake after bpp.\n");
-      		xTaskCreateStaticPinnedToCore(mp_task, "mp_task", MP_TASK_STACK_LEN, NULL, MP_TASK_PRIORITY,
-      				&mp_task_stack[0], &mp_task_tcb, 0);
-      	}
+					printf("Touch wake after bpp.\n");
+					xTaskCreateStaticPinnedToCore(mp_task, "mp_task", MP_TASK_STACK_LEN, NULL, MP_TASK_PRIORITY,
+							&mp_task_stack[0], &mp_task_tcb, 0);
+				}
 				break;
 #endif
 
