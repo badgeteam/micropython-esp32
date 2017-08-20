@@ -38,7 +38,7 @@ ESPCOMP = $(ESPIDF)/components
 ESPTOOL ?= $(ESPCOMP)/esptool_py/esptool/esptool.py
 
 # verify the ESP IDF version
-ESPIDF_SUPHASH := f13b5966d82ccb7c907d7ea1fa7eaf22335c104b
+ESPIDF_SUPHASH := 525ee784af5f1131969a40c56434a92b93e34be2
 ESPIDF_CURHASH := $(shell git -C $(ESPIDF) show -s --pretty=format:'%H')
 ifneq ($(ESPIDF_CURHASH),$(ESPIDF_SUPHASH))
 $(info ** WARNING **)
@@ -298,6 +298,7 @@ ESPIDF_ESP32_O = $(addprefix $(ESPCOMP)/esp32/,\
 	intr_alloc.o \
 	dport_access.o \
 	brownout.o \
+	fast_crypto_ops.o \
 	)
 
 ESPIDF_HEAP_O = $(addprefix $(ESPCOMP)/heap/,\
@@ -632,6 +633,10 @@ ESPIDF_WPA_SUPPLICANT_O = $(addprefix $(ESPCOMP)/wpa_supplicant/,\
 	src/crypto/bignum.o \
 	src/crypto/crypto_internal-modexp.o \
 	src/crypto/crypto_internal-cipher.o \
+	src/fast_crypto/fast_sha256.o \
+	src/fast_crypto/fast_sha256-internal.o \
+	src/fast_crypto/fast_aes-wrap.o \
+	src/fast_crypto/fast_aes-unwrap.o \
 	port/os_xtensa.o \
 	)
 
