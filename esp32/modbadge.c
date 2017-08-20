@@ -581,7 +581,7 @@ STATIC MP_DEFINE_CONST_FUN_OBJ_0(badge_power_sdcard_disable_obj, badge_power_sdc
 
 // LEDs
 
-#if defined(PIN_NUM_LED) || defined(MPR121_PIN_NUM_LEDS)
+#if defined(PIN_NUM_LEDS)
 STATIC mp_obj_t badge_leds_init_() {
   badge_leds_init();
   return mp_const_none;
@@ -795,7 +795,7 @@ STATIC const mp_rom_map_elem_t badge_module_globals_table[] = {
     {MP_ROM_QSTR(MP_QSTR_nvs_get_u16), MP_ROM_PTR(&badge_nvs_get_u16_obj)},
     {MP_ROM_QSTR(MP_QSTR_nvs_set_u16), MP_ROM_PTR(&badge_nvs_set_u16_obj)},
 
-#if defined(PIN_NUM_LED) || defined(MPR121_PIN_NUM_LEDS)
+#if defined(PIN_NUM_LEDS)
     // LEDs
     {MP_OBJ_NEW_QSTR(MP_QSTR_leds_init), (mp_obj_t)&badge_leds_init_obj},
     {MP_OBJ_NEW_QSTR(MP_QSTR_leds_enable), (mp_obj_t)&badge_leds_enable_obj},
