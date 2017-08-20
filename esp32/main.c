@@ -88,7 +88,9 @@ mp_import_stat_t
 mp_import_stat(const char *path) {
 	if (in_safe_mode) {
 		// be more strict in which modules we would like to load
-		if (strncmp(path, "/lib/", 5) != 0) {
+		if (strncmp(path, "/lib/", 5) != 0
+				&& strncmp(path, "/bpp/lib/", 9) != 0
+				&& strncmp(path, "/sdcard/lib/", 12) != 0) {
 			return MP_IMPORT_STAT_NO_EXIST;
 		}
 
@@ -129,8 +131,11 @@ soft_reset:
     gc_init(mp_task_heap, mp_task_heap + sizeof(mp_task_heap));
     mp_init();
     mp_obj_list_init(mp_sys_path, 0);
+    // library-path '' is needed for the internal modules.
     mp_obj_list_append(mp_sys_path, MP_OBJ_NEW_QSTR(MP_QSTR_));
     mp_obj_list_append(mp_sys_path, MP_OBJ_NEW_QSTR(MP_QSTR__slash_lib));
+    mp_obj_list_append(mp_sys_path, MP_OBJ_NEW_QSTR(MP_QSTR__slash_bpp_slash_lib));
+    mp_obj_list_append(mp_sys_path, MP_OBJ_NEW_QSTR(MP_QSTR__slash_sdcard_slash_lib));
     mp_obj_list_init(mp_sys_argv, 0);
     readline_init0();
 
