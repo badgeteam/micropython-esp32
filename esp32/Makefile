@@ -38,7 +38,7 @@ ESPCOMP = $(ESPIDF)/components
 ESPTOOL ?= $(ESPCOMP)/esptool_py/esptool/esptool.py
 
 # verify the ESP IDF version
-ESPIDF_SUPHASH := 2ce9a383d326c2b2c29f0e7c87ce44db04d60c51
+ESPIDF_SUPHASH := 223ef05fb57ba3312a1ee4d76f1f1ba53e41ac12
 ESPIDF_CURHASH := $(shell git -C $(ESPIDF) show -s --pretty=format:'%H')
 ifneq ($(ESPIDF_CURHASH),$(ESPIDF_SUPHASH))
 $(info ** WARNING **)
@@ -234,8 +234,8 @@ LIB_SRC_C += \
 	$(ESPCOMP)/fatfs/src/vfs_fat_sdmmc.c \
 	$(ESPCOMP)/fatfs/src/vfs_fat_spiflash.c \
 	$(ESPCOMP)/fatfs/src/vfs_fat.c \
-	$(ESPCOMP)/fatfs/src/option/syscall.c \
-	$(ESPCOMP)/fatfs/src/option/unicode.c
+	$(ESPCOMP)/fatfs/src/ffunicode.c \
+	$(ESPCOMP)/fatfs/src/ffsystem.c
 endif
 
 DRIVERS_SRC_C = $(addprefix drivers/,\
@@ -399,8 +399,8 @@ ESPIDF_VFS_O = $(addprefix $(ESPCOMP)/vfs/,\
 	)
 
 ESPIDF_JSON_O = $(addprefix $(ESPCOMP)/json/,\
-	library/cJSON.o \
-	port/cJSON_Utils.o \
+	cJSON/cJSON.o \
+	cJSON/cJSON_Utils.o \
 	)
 
 ESPIDF_LOG_O = $(addprefix $(ESPCOMP)/log/,\
@@ -815,6 +815,7 @@ BOOTLOADER_OBJ = $(addprefix $(BUILD)/bootloader/$(ESPCOMP)/,\
 	bootloader_support/src/bootloader_flash.o \
 	bootloader_support/src/bootloader_sha.o \
 	bootloader_support/src/bootloader_random.o \
+	bootloader_support/src/bootloader_clock.o \
 	bootloader_support/src/secure_boot_signatures.o \
 	bootloader_support/src/secure_boot.o \
 	bootloader_support/src/esp_image_format.o \
@@ -824,6 +825,7 @@ BOOTLOADER_OBJ = $(addprefix $(BUILD)/bootloader/$(ESPCOMP)/,\
 	spi_flash/spi_flash_rom_patch.o \
 	soc/esp32/rtc_clk.o \
 	soc/esp32/rtc_time.o \
+	soc/esp32/rtc_init.o \
 	micro-ecc/micro-ecc/uECC.o \
 	bootloader/subproject/main/bootloader_start.o \
 	)
