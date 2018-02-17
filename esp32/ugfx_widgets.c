@@ -299,7 +299,7 @@ STATIC mp_obj_t ugfx_button_make_new(const mp_obj_type_t *type, mp_uint_t n_args
 			// TODO where to keep this reference so we can clean it up afterwards?
 			// Perhaps pass our own structure to gwinButtonCreate?
 			GListener* pl = malloc(sizeof(GListener));
-			printf("Created GListener at %x\n", pl);
+			printf("Created GListener at %p\n", pl);
 			geventListenerInit(pl);
 			pl->callback = ugfx_button_gevent_handler;
 			// TODO do we need to copy this value to make sure it doesn't get freed?
@@ -443,11 +443,11 @@ STATIC mp_obj_t ugfx_textbox_cursor_pos(mp_uint_t n_args, const mp_obj_t *args) 
     }
     else
     {
-        const int newPos = mp_obj_get_int(args[1]);
-				printf("Setting cursor position for widget at %p to %d\n", self, newPos);
-        ((GTexteditObject*)self->ghTextbox)->cursorPos = newPos;
-				// Should not be needed to do this explicitly right?
-				gwinTexteditDefaultDraw(self, NULL);
+		const int newPos = mp_obj_get_int(args[1]);
+		printf("Setting cursor position for widget at %p to %d\n", self, newPos);
+		((GTexteditObject*)self->ghTextbox)->cursorPos = newPos;
+		// Should not be needed to do this explicitly right?
+		gwinTexteditDefaultDraw((GWidgetObject *) self->ghTextbox, NULL);
         return mp_const_none;
     }
 }
@@ -459,7 +459,7 @@ STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(ugfx_textbox_cursor_pos_obj, 1, 2, ug
 STATIC mp_obj_t ugfx_textbox_backspace(mp_obj_t self_in) {
     ugfx_textbox_obj_t *self = self_in;
 
-	gwinTexteditBackspace(self->ghTextbox);
+	gwinTexteditBackspace((GWidgetObject *) self->ghTextbox);
 
     return mp_const_none;
 }
