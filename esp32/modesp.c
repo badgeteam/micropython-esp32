@@ -49,6 +49,10 @@
 #include "sdmmc_cmd.h"
 #endif
 
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "esp_task_wdt.h"
+
 /* esp.temperature_sens_read() */
 extern int temprature_sens_read();
 STATIC mp_obj_t esp_temperature_sens_read() {
@@ -64,6 +68,78 @@ STATIC mp_obj_t esp_hall_sens_read() {
 STATIC MP_DEFINE_CONST_FUN_OBJ_0(esp_hall_sens_read_obj, esp_hall_sens_read);
 
 
+/* esp.wdt_start(<secs>) */
+STATIC mp_obj_t esp_wdt_start(mp_obj_t timeout) {
+	// reconfigure watchdog
+	mp_int_t t = mp_obj_get_int(timeout);
+	esp_err_t res = esp_task_wdt_init(t, true);
+	if (res != ESP_OK) {
+		if (res == ESP_ERR_NO_MEM)
+			mp_raise_msg(&mp_type_MemoryError, "WDT: Out of memory");
+		mp_raise_msg(&mp_type_NotImplementedError, "WDT: Unknown error");
+	}
+
+	// add current task
+	res = esp_task_wdt_add(NULL);
+	if (res != ESP_OK) {
+		if (res == ESP_ERR_INVALID_ARG)
+			mp_raise_msg(&mp_type_AttributeError, "WDT: Task is already subscribed");
+		if (res == ESP_ERR_NO_MEM)
+			mp_raise_msg(&mp_type_MemoryError, "WDT: Out of memory");
+		if (res == ESP_ERR_INVALID_STATE)
+			mp_raise_msg(&mp_type_AttributeError, "WDT: Not initialized");
+		mp_raise_msg(&mp_type_NotImplementedError, "WDT: Unknown error");
+	}
+
+	return mp_const_none;
+}
+STATIC MP_DEFINE_CONST_FUN_OBJ_1(esp_wdt_start_obj, esp_wdt_start);
+
+/* esp.wdt_stop() */
+STATIC mp_obj_t esp_wdt_stop(void) {
+	// remove current task
+	esp_err_t res = esp_task_wdt_delete(NULL);
+	if (res != ESP_OK) {
+		if (res == ESP_ERR_INVALID_ARG)
+			mp_raise_msg(&mp_type_AttributeError, "WDT: Task is already unsubscribed");
+		if (res == ESP_ERR_INVALID_STATE)
+			mp_raise_msg(&mp_type_AttributeError, "WDT: Not initialized");
+		mp_raise_msg(&mp_type_NotImplementedError, "WDT: Unknown error");
+	}
+
+	// reconfigure watchdog to startup-state.
+#ifdef CONFIG_TASK_WDT_PANIC
+	res = esp_task_wdt_init(CONFIG_TASK_WDT_TIMEOUT_S, true);
+#elif CONFIG_TASK_WDT
+	res = esp_task_wdt_init(CONFIG_TASK_WDT_TIMEOUT_S, false);
+#endif
+	if (res != ESP_OK) {
+		if (res == ESP_ERR_NO_MEM)
+			mp_raise_msg(&mp_type_MemoryError, "WDT: Out of memory");
+		mp_raise_msg(&mp_type_NotImplementedError, "WDT: Unknown error");
+	}
+
+	return mp_const_none;
+}
+STATIC MP_DEFINE_CONST_FUN_OBJ_0(esp_wdt_stop_obj, esp_wdt_stop);
+
+/* esp.wdt_reset() */
+STATIC mp_obj_t esp_wdt_reset(void) {
+	esp_err_t res = esp_task_wdt_reset();
+	if (res != ESP_OK) {
+		if (res == ESP_ERR_NOT_FOUND)
+			mp_raise_msg(&mp_type_AttributeError, "WDT: Task is not subscribed");
+		if (res == ESP_ERR_INVALID_STATE)
+			mp_raise_msg(&mp_type_AttributeError, "WDT: Not initialized");
+		mp_raise_msg(&mp_type_NotImplementedError, "WDT: Unknown error");
+	}
+
+	return mp_const_none;
+}
+STATIC MP_DEFINE_CONST_FUN_OBJ_0(esp_wdt_reset_obj, esp_wdt_reset);
+
+
+/* flash */
 STATIC wl_handle_t fs_handle = WL_INVALID_HANDLE;
 STATIC size_t wl_sect_size = 4096;
 
@@ -378,6 +454,10 @@ STATIC const mp_rom_map_elem_t esp_module_globals_table[] = {
 
     { MP_ROM_QSTR(MP_QSTR_temperature_sens_read), MP_ROM_PTR(&esp_temperature_sens_read_obj) },
     { MP_ROM_QSTR(MP_QSTR_hall_sens_read), MP_ROM_PTR(&esp_hall_sens_read_obj) },
+
+    { MP_ROM_QSTR(MP_QSTR_wdt_start), MP_ROM_PTR(&esp_wdt_start_obj) },
+    { MP_ROM_QSTR(MP_QSTR_wdt_stop), MP_ROM_PTR(&esp_wdt_stop_obj) },
+    { MP_ROM_QSTR(MP_QSTR_wdt_reset), MP_ROM_PTR(&esp_wdt_reset_obj) },
 
     { MP_ROM_QSTR(MP_QSTR_flash_read), MP_ROM_PTR(&esp_flash_read_obj) },
     { MP_ROM_QSTR(MP_QSTR_flash_write), MP_ROM_PTR(&esp_flash_write_obj) },
