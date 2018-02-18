@@ -71,17 +71,17 @@ STATIC MP_DEFINE_CONST_FUN_OBJ_0(esp_hall_sens_read_obj, esp_hall_sens_read);
 /* esp.wdt_start(<secs>) */
 STATIC mp_obj_t esp_wdt_start(mp_obj_t timeout) {
 	// reconfigure watchdog
-    mp_int_t t = mp_obj_get_int(timeout);
+	mp_int_t t = mp_obj_get_int(timeout);
 	esp_err_t res = esp_task_wdt_init(t, true);
-    if (res != ESP_OK) {
+	if (res != ESP_OK) {
 		if (res == ESP_ERR_NO_MEM)
 			mp_raise_msg(&mp_type_MemoryError, "WDT: Out of memory");
 		mp_raise_msg(&mp_type_NotImplementedError, "WDT: Unknown error");
-    }
+	}
 
 	// add current task
 	res = esp_task_wdt_add(NULL);
-    if (res != ESP_OK) {
+	if (res != ESP_OK) {
 		if (res == ESP_ERR_INVALID_ARG)
 			mp_raise_msg(&mp_type_AttributeError, "WDT: Task is already subscribed");
 		if (res == ESP_ERR_NO_MEM)
@@ -89,9 +89,9 @@ STATIC mp_obj_t esp_wdt_start(mp_obj_t timeout) {
 		if (res == ESP_ERR_INVALID_STATE)
 			mp_raise_msg(&mp_type_AttributeError, "WDT: Not initialized");
 		mp_raise_msg(&mp_type_NotImplementedError, "WDT: Unknown error");
-    }
+	}
 
-    return mp_const_none;
+	return mp_const_none;
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_1(esp_wdt_start_obj, esp_wdt_start);
 
@@ -99,13 +99,13 @@ STATIC MP_DEFINE_CONST_FUN_OBJ_1(esp_wdt_start_obj, esp_wdt_start);
 STATIC mp_obj_t esp_wdt_stop(void) {
 	// remove current task
 	esp_err_t res = esp_task_wdt_delete(NULL);
-    if (res != ESP_OK) {
+	if (res != ESP_OK) {
 		if (res == ESP_ERR_INVALID_ARG)
 			mp_raise_msg(&mp_type_AttributeError, "WDT: Task is already unsubscribed");
 		if (res == ESP_ERR_INVALID_STATE)
 			mp_raise_msg(&mp_type_AttributeError, "WDT: Not initialized");
 		mp_raise_msg(&mp_type_NotImplementedError, "WDT: Unknown error");
-    }
+	}
 
 	// reconfigure watchdog to startup-state.
 #ifdef CONFIG_TASK_WDT_PANIC
@@ -113,28 +113,28 @@ STATIC mp_obj_t esp_wdt_stop(void) {
 #elif CONFIG_TASK_WDT
 	res = esp_task_wdt_init(CONFIG_TASK_WDT_TIMEOUT_S, false);
 #endif
-    if (res != ESP_OK) {
+	if (res != ESP_OK) {
 		if (res == ESP_ERR_NO_MEM)
 			mp_raise_msg(&mp_type_MemoryError, "WDT: Out of memory");
 		mp_raise_msg(&mp_type_NotImplementedError, "WDT: Unknown error");
-    }
+	}
 
-    return mp_const_none;
+	return mp_const_none;
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_0(esp_wdt_stop_obj, esp_wdt_stop);
 
 /* esp.wdt_reset() */
 STATIC mp_obj_t esp_wdt_reset(void) {
 	esp_err_t res = esp_task_wdt_reset();
-    if (res != ESP_OK) {
+	if (res != ESP_OK) {
 		if (res == ESP_ERR_NOT_FOUND)
 			mp_raise_msg(&mp_type_AttributeError, "WDT: Task is not subscribed");
 		if (res == ESP_ERR_INVALID_STATE)
 			mp_raise_msg(&mp_type_AttributeError, "WDT: Not initialized");
 		mp_raise_msg(&mp_type_NotImplementedError, "WDT: Unknown error");
-    }
+	}
 
-    return mp_const_none;
+	return mp_const_none;
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_0(esp_wdt_reset_obj, esp_wdt_reset);
 
