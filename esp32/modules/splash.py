@@ -21,7 +21,6 @@ def draw(mode, goingToSleep=False):
     if mode:
         # We flush the buffer and wait
         ugfx.flush(ugfx.LUT_FULL)
-        badge.eink_busy_wait()
     else:
         # We prepare the screen refresh
         ugfx.clear(ugfx.WHITE)

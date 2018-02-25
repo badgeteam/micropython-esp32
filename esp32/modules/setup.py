@@ -22,7 +22,6 @@ def asked_nickname(value):
         badge.nvs_set_u8('badge', 'setup.state', 2) # Skip the sponsors
         badge.nvs_set_u8('sponsors', 'shown', 1)
 
-    badge.eink_busy_wait()
     appglue.home()
 
 ugfx.init()
