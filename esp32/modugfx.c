@@ -894,7 +894,10 @@ STATIC mp_obj_t ugfx_demo(mp_obj_t hacking) {
 #ifdef UNIX
   mp_hal_delay_ms(EMU_EINK_SCREEN_DELAY_MS);
 #endif
+  uint8_t target_lut_backup = target_lut;
+  target_lut = 0xff;
   gdispFlush();
+  target_lut = target_lut_backup;
 
   return mp_const_none;
 }
