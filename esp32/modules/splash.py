@@ -20,7 +20,7 @@ import tasks.services as services
 def draw(mode, goingToSleep=False):
     if mode:
         # We flush the buffer and wait
-        ugfx.flush(ugfx.LUT_FULL)
+        ugfx.flush(ugfx.GREYSCALE)
         badge.eink_busy_wait()
     else:
         # We prepare the screen refresh
