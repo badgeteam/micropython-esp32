@@ -168,7 +168,11 @@ if badge.safe_mode():
     services.force_draw()
     draw(True)
 else:
-    services.setup(draw) # Start services
+    have_services = services.setup(draw) # Start services
+    if not have_services:
+        draw(False)
+        services.force_draw()
+        draw(True)
 
 easywifi.disable()
 gc.collect()
