@@ -159,8 +159,6 @@ def draw_task():
         print("[DEBUG] Deleted draw callback: ",dcb)
         drawCallbacks = list(dcb for dcb in drawCallbacks if dcb!=deleted[i])
     
-    badge.eink_busy_wait()
-    
     if requestedInterval<1000:
         #Draw at most once a second
         print("[SERVICES] Can't draw more than once a second!")

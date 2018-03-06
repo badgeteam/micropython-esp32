@@ -10,7 +10,6 @@ def start_app(app, display = True):
             ugfx.string(0,  25, "Returning to homescreen...","Roboto_Regular12",ugfx.BLACK)
         ugfx.flush(ugfx.LUT_FASTER)
     esp.rtcmem_write_string(app)
-    badge.eink_busy_wait()
     deepsleep.reboot()
 
 def home():
