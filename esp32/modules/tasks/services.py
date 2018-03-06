@@ -27,7 +27,7 @@ def setup(drawCb=None):
     try:
         apps = uos.listdir('lib')
     except OSError:
-        return [False, False]
+        return False
     
     #For each app...
     for app in apps:
