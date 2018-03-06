@@ -163,16 +163,20 @@ if not easywifi.failure():
 if not easywifi.failure():
     spoc.show(False)    # Check sponsors
 
-if not badge.safe_mode():
-    services.setup(draw) # Start services
-
-draw(False)
-services.force_draw()
-draw(True)
+if badge.safe_mode():
+    draw(False)
+    services.force_draw()
+    draw(True)
+else:
+    have_services = services.setup(draw) # Start services
+    if not have_services:
+        draw(False)
+        services.force_draw()
+        draw(True)
 
 easywifi.disable()
 gc.collect()
-    
+
 virtualtimers.activate(25)
 pm.callback(onSleep)
 pm.feed()
