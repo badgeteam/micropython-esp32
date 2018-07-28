@@ -37,18 +37,6 @@ ESPIDF = $(IDF_PATH)
 ESPCOMP = $(ESPIDF)/components
 ESPTOOL ?= $(ESPCOMP)/esptool_py/esptool/esptool.py
 
-# verify the ESP IDF version
-ESPIDF_SUPHASH := b13a2187db5580756265a067c1b9192afc489c5f
-ESPIDF_CURHASH := $(shell git -C $(ESPIDF) show -s --pretty=format:'%H')
-ifneq ($(ESPIDF_CURHASH),$(ESPIDF_SUPHASH))
-$(info ** WARNING **)
-$(info The git hash of ESP IDF does not match the supported version)
-$(info The build may complete and the firmware may work but it is not guaranteed)
-$(info ESP IDF path:       $(ESPIDF))
-$(info Current git hash:   $(ESPIDF_CURHASH))
-$(info Supported git hash: $(ESPIDF_SUPHASH))
-endif
-
 # pretty format of ESP IDF version, used internally by the IDF
 IDF_VER := $(shell git -C $(ESPIDF) describe)
 
@@ -738,10 +726,7 @@ OBJ_ESPIDF += $(addprefix $(BUILD)/, $(BADGE_COMPONENTS_O))
 
 all: $(BUILD)/firmware.bin
 
-.PHONY: idf-version deploy erase
-
-idf-version:
-	$(ECHO) "ESP IDF supported hash: $(ESPIDF_SUPHASH)"
+.PHONY: deploy erase
 
 $(BUILD)/firmware.bin: $(BUILD)/bootloader.bin $(BUILD)/partitions.bin $(BUILD)/application.bin
 	$(ECHO) "Create $@"
