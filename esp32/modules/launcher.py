@@ -161,10 +161,7 @@ def init_power_management():
 def start():
     ugfx.input_init()
     ugfx.set_lut(ugfx.LUT_FASTER)
-    ugfx.clear(ugfx.BLACK)
-    ugfx.flush()
     ugfx.clear(ugfx.WHITE)
-    ugfx.flush()
 
     if badge.safe_mode():
 	still = "SAFE"
@@ -213,7 +210,8 @@ def start():
     populate_category()
     populate_options()
 
-    ugfx.flush(ugfx.LUT_FULL)
+    # do a greyscale flush on start
+    ugfx.flush(ugfx.GREYSCALE)
 
 start()
 init_power_management()
