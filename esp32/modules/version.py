@@ -1,2 +1,2 @@
-build = 15
-name = "De Vergeten Vallei (rc1)"
+build = 16
+name = "De Vergeten Vallei (rc2)"
