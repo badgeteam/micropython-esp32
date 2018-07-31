@@ -190,12 +190,10 @@ STATIC MP_DEFINE_CONST_FUN_OBJ_0(ugfx_height_obj, ugfx_height);
 ///
 STATIC mp_obj_t ugfx_get_pixel(mp_obj_t x_in, mp_obj_t y_in) {
     // extract arguments
-    //ugfx_obj_t *self = args[0];
-	//int x = mp_obj_get_int(x_in);
-	//int y = mp_obj_get_int(y_in);
-	return mp_obj_new_int(0);
-	//needs sorting, currently returns somewhat dodgy values
-    //return mp_obj_new_int(gdispGetPixelColor(x,y));
+    int x = mp_obj_get_int(x_in);
+    int y = mp_obj_get_int(y_in);
+
+    return mp_obj_new_int(gdispGetPixelColor(x,y));
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_2(ugfx_get_pixel_obj, ugfx_get_pixel);
 
@@ -1136,6 +1134,7 @@ STATIC const mp_rom_map_elem_t ugfx_module_globals_table[] = {
     {MP_OBJ_NEW_QSTR(MP_QSTR_text), (mp_obj_t)&ugfx_text_obj },
     {MP_OBJ_NEW_QSTR(MP_QSTR_string_box), (mp_obj_t)&ugfx_string_box_obj},
 
+    {MP_OBJ_NEW_QSTR(MP_QSTR_get_pixel), (mp_obj_t)&ugfx_get_pixel_obj},
     {MP_OBJ_NEW_QSTR(MP_QSTR_pixel), (mp_obj_t)&ugfx_pixel_obj},
     {MP_OBJ_NEW_QSTR(MP_QSTR_line), (mp_obj_t)&ugfx_line_obj},
     {MP_OBJ_NEW_QSTR(MP_QSTR_box), (mp_obj_t)&ugfx_box_obj},
