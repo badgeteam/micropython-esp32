@@ -34,7 +34,7 @@
 // x86-64 callee-save registers are:
 //  rbx, rbp, rsp, r12, r13, r14, r15
 
-#define NLR_OS_WINDOWS (defined(_WIN32) || defined(__CYGWIN__))
+//#define NLR_OS_WINDOWS (defined(_WIN32) || defined(__CYGWIN__))
 
 __attribute__((used)) unsigned int nlr_push_tail(nlr_buf_t *nlr);
 
