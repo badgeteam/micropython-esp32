@@ -65,14 +65,14 @@
 #define MP_TASK_PRIORITY        (ESP_TASK_PRIO_MIN + 1)
 #define MP_TASK_STACK_SIZE      ( 8 * 1024)
 #define MP_TASK_STACK_LEN       (MP_TASK_STACK_SIZE / sizeof(StackType_t))
-#define MP_TASK_HEAP_SIZE       (88 * 1024)
+#define MP_TASK_HEAP_SIZE       (256 * 1024)
 
 //define BUTTON_SAFE_MODE ((1 << BADGE_BUTTON_A) || (1 << BADGE_BUTTON_B))
 #define BUTTON_SAFE_MODE ((1 << BADGE_BUTTON_START))
 
 STATIC StaticTask_t mp_task_tcb;
 STATIC StackType_t mp_task_stack[MP_TASK_STACK_LEN] __attribute__((aligned (8)));
-STATIC uint8_t mp_task_heap[MP_TASK_HEAP_SIZE];
+STATIC uint8_t *mp_task_heap;
 
 extern uint32_t reset_cause;
 extern bool in_safe_mode;
@@ -129,7 +129,7 @@ soft_reset:
     // initialise the stack pointer for the main thread
     mp_stack_set_top((void *)sp);
     mp_stack_set_limit(MP_TASK_STACK_SIZE - 1024);
-    gc_init(mp_task_heap, mp_task_heap + sizeof(mp_task_heap));
+		gc_init(mp_task_heap, &mp_task_heap[MP_TASK_HEAP_SIZE]);
     mp_init();
     mp_obj_list_init(mp_sys_path, 0);
     // library-path '' is needed for the internal modules.
@@ -193,6 +193,8 @@ void do_bpp_bgnd() {
 }
 
 void app_main(void) {
+	mp_task_heap = malloc(MP_TASK_HEAP_SIZE);
+	if (mp_task_heap == NULL) { printf("ALLOC FAILED! OUT OF MEMORY!\n"); return; }
 	badge_check_first_run();
 	badge_base_init();
 
