@@ -33,6 +33,11 @@ class Splash:
 		for i in range(6):
 			disobey.dev.led(i,0,0,0)
 	
+	def wait_for_buttons(self):
+		while (disobey.dev.read_buttons() > 0):
+			pm.feed()
+			time.sleep(0.01)
+	
 	def task_main(self):
 		if self.redraw:
 			self.screen_main()
@@ -41,6 +46,7 @@ class Splash:
 		if i > 0:
 			pm.feed()
 		if i == (1<<disobey.dev.BTN_OK): #OK button
+			self.wait_for_buttons()
 			services.stop()
 			self.leds_off()
 			self.menu_main()
@@ -101,6 +107,7 @@ class Splash:
 		i = disobey.dev.read_buttons()
 		if i > 0:
 			pm.feed()
+			self.wait_for_buttons()
 		if i == (1<<disobey.dev.BTN_UP): #Up
 			if (self.menu_selected>0):
 				self.menu_selected -= 1
@@ -131,8 +138,8 @@ class Splash:
 		vt.new(1, self.menu_task, True)
 
 	def menu_settings(self):
-		items = ["Change nickname", "Configure WiFi", "OTA update", "Update all apps", "Swap orientation", "< Return to main menu"]
-		callbacks = [self.opt_change_nickname, self.opt_configure_wifi, self.opt_ota, self.opt_update_apps, self.opt_swap_orientation, self.menu_main, self.menu_main]
+		items = ["Change nickname", "Configure WiFi", "OTA update", "Update all apps", "< Return to main menu"]
+		callbacks = [self.opt_change_nickname, self.opt_configure_wifi, self.opt_ota, self.opt_update_apps,  self.menu_main, self.menu_main]
 		self.menu("Settings", items, callbacks)
 		
 	def menu_main(self):
@@ -141,8 +148,8 @@ class Splash:
 		self.menu("Main menu", items, callbacks)
 		
 	def menu_recovery(self):
-		items = ["Apps", "Change nickname", "Configure WiFi", "OTA update", "Update all apps", "Swap orientation", "Power off"]
-		callbacks = [self.opt_launcher, self.opt_change_nickname, self.opt_configure_wifi, self.opt_ota, self.opt_update_apps, self.opt_swap_orientation, self.go_to_sleep, self.menu_recovery]
+		items = ["Apps", "Change nickname", "Configure WiFi", "OTA update", "Update all apps", "Power off"]
+		callbacks = [self.opt_launcher, self.opt_change_nickname, self.opt_configure_wifi, self.opt_ota, self.opt_update_apps, self.go_to_sleep, self.menu_recovery]
 		self.menu("Recovery menu", items, callbacks)
 	
 	def screen_main(self, init=False):

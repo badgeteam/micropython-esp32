@@ -58,9 +58,9 @@ dev = Samd(i2c)
 
 
 #Framebuffer
-fb_buf = bytearray([0]*1024)
-fb = framebuf.FrameBuffer(fb_buf, 128, 64, framebuf.MONO_VLSB)
+_fb_buf = bytearray([0]*1024)
+fb = framebuf.FrameBuffer(_fb_buf, 128, 64, framebuf.MONO_VLSB)
 
 def fb_write():
 	global fb_buf
-	lcd.write(fb_buf)
+	lcd.writeFlipped(_fb_buf)
