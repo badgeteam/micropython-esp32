@@ -159,6 +159,7 @@ def init_power_management():
 
 # Main application
 def start():
+    print("Launcher start standalone")
     ugfx.input_init()
     ugfx.set_lut(ugfx.LUT_FASTER)
     ugfx.clear(ugfx.WHITE)
@@ -209,9 +210,20 @@ def start():
     populate_apps()
     populate_category()
     populate_options()
+    
 
     # do a greyscale flush on start
     ugfx.flush(ugfx.GREYSCALE)
+    
+def start_splash():
+    print("Launcher start splash")
+    global options
+    global install_path
+    options = None
+    install_path = None
+    populate_apps()
+    populate_category()
+    populate_options()
 
 start()
 init_power_management()

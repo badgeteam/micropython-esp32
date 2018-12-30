@@ -27,13 +27,17 @@ else:
 
 try:
     if not splash=="shell":
-        if splash.startswith('bpp '):
-            splash = splash[4:len(splash)]
-            badge.mount_bpp()
-        elif splash.startswith('sdcard '):
-            splash = splash[7:len(splash)]
-            badge.mount_sdcard()
-        __import__(splash)
+        import post_ota
+        if (badge.nvs_get_u8('badge', 'setup.state', 0) < 3):
+            import firstboot
+        else:
+            if splash.startswith('bpp '):
+                splash = splash[4:len(splash)]
+                badge.mount_bpp()
+            elif splash.startswith('sdcard '):
+                splash = splash[7:len(splash)]
+                badge.mount_sdcard()
+            __import__(splash)
     else:
         ugfx.clear(ugfx.WHITE)
         ugfx.flush(ugfx.LUT_FULL)

@@ -1,13 +1,12 @@
 # File: easydraw.py
-# Version: 1
 # Description: Wrapper that makes drawing things simple
 # License: MIT
 # Authors: Renze Nicolai <renze@rnplus.nl>
 
-import ugfx, badge
+import ugfx, badge, version
 
 # Functions
-def msg(message, title = 'Still Loading Anyway...', reset = False):
+def msg(message, title = 'Loading...', reset = False):
     """Show a terminal style loading screen with title
 
     title can be optionaly set when resetting or first call
@@ -20,24 +19,36 @@ def msg(message, title = 'Still Loading Anyway...', reset = False):
             raise exception
     except:
         ugfx.clear(ugfx.WHITE)
-        ugfx.string(0, 0, title, "PermanentMarker22", ugfx.BLACK)
+        ugfx.string(0, 0, title, version.font_header, ugfx.BLACK)
         messageHistory = []
 
     if len(messageHistory)<6:
-        ugfx.string(0, 30 + (len(messageHistory) * 15), message, "Roboto_Regular12", ugfx.BLACK)
+        ugfx.string(0, 30 + (len(messageHistory) * 15), message, version.font_default, ugfx.BLACK)
         messageHistory.append(message)
     else:
         messageHistory.pop(0)
         messageHistory.append(message)
         ugfx.area(0,30, 296, 98, ugfx.WHITE)
         for i, message in enumerate(messageHistory):
-            ugfx.string(0, 30 + (i * 15), message, "Roboto_Regular12", ugfx.BLACK)
+            ugfx.string(0, 30 + (i * 15), message, version.font_default, ugfx.BLACK)
 
     ugfx.flush(ugfx.LUT_FASTER)
 
-def nickname(y = 25, font = "PermanentMarker36", color = ugfx.BLACK):
-    nick = badge.nvs_get_str("owner", "name", 'Henk de Vries')
-    ugfx.string_box(0,y,296,38, nick, font, color, ugfx.justifyCenter)
+def nickname(y = 25, font = version.font_nickname_large, color = ugfx.BLACK, split = version.nick_width_large, height = version.nick_height_large):
+	nick = badge.nvs_get_str("owner", "name", 'Henk de Vries')
+	if ugfx.orientation() != 0:
+		split = version.nick_width_small
+		if font == version.font_nickname_large:
+			font = version.font_nickname_small
+			height = version.nick_height_small
+		lines = lineSplit(nick, split)
+		print("Nickname",split,font,lines,y,height)
+		for i in range(0, len(lines)):
+			print("string_box",0, y+height*i, ugfx.width(), height, lines[i], font, color, ugfx.justifyCenter)
+			ugfx.string_box(0, y+height*i, ugfx.width(), height, lines[i], font, color, ugfx.justifyCenter)
+	else:
+		#New method is bugged out for old situation so... hack!
+		ugfx.string_box(0, y, ugfx.width(), height, nick, font, color, ugfx.justifyCenter)
 
 def battery(on_usb, vBatt, charging):
     vMin = badge.nvs_get_u16('batt', 'vmin', 3500) # mV
@@ -61,3 +72,21 @@ def battery(on_usb, vBatt, charging):
         ugfx.box(2,2,46,18,ugfx.BLACK)
         ugfx.box(48,7,2,8,ugfx.BLACK)
         ugfx.area(3,3,width,16,ugfx.BLACK)
+
+def lineSplit(message, width):
+	words = message.split(" ")
+	lines = []
+	line = ""
+	for word in words:
+		if len(word) > width:
+			lines.append(line)
+			lines.append(word)
+			line = ""
+		elif len(line)+len(word) < width:
+			line += " "+word
+		else:
+			lines.append(line)
+			line = word
+	if len(line) > 0:
+		lines.append(line)
+	return lines
