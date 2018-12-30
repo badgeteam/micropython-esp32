@@ -25,8 +25,8 @@ FROZEN_MPY_DIR = modules
 # include py core make definitions
 include ../py/py.mk
 
-PORT ?= /dev/ttyUSB0
-BAUD ?= 921600
+PORT ?= /dev/ttyACM0
+BAUD ?= 115200
 FLASH_MODE ?= dio
 FLASH_FREQ ?= 80m
 FLASH_SIZE ?= 16MB
@@ -734,16 +734,16 @@ $(BUILD)/firmware.bin: $(BUILD)/bootloader.bin $(BUILD)/partitions.bin $(BUILD)/
 
 deploy: $(BUILD)/firmware.bin
 	$(ECHO) "Writing $^ to the board"
-	$(Q)$(ESPTOOL) --chip esp32 --port $(PORT) --baud $(BAUD) write_flash -z --flash_mode $(FLASH_MODE) --flash_freq $(FLASH_FREQ) 0x1000 $^
+	$(Q)$(ESPTOOL) --before no_reset --after no_reset --chip esp32 --port $(PORT) --baud $(BAUD) write_flash -z --flash_mode $(FLASH_MODE) --flash_freq $(FLASH_FREQ) 0x1000 $^
 
 flash: $(BUILD)/firmware.bin
 	$(ECHO) "Writing $^ to the board"
-	$(Q)$(ESPTOOL) --port $(PORT) --baud $(BAUD) erase_region 0xd000 0x2000
-	$(Q)$(ESPTOOL) --port $(PORT) --baud $(BAUD) write_flash 0x10000 build/application.bin
+	$(Q)$(ESPTOOL) --before no_reset --after no_reset --port $(PORT) --baud $(BAUD) erase_region 0xd000 0x2000
+	$(Q)$(ESPTOOL) --before no_reset --after no_reset --port $(PORT) --baud $(BAUD) write_flash 0x10000 build/application.bin
 
 erase:
 	$(ECHO) "Erasing flash"
-	$(Q)$(ESPTOOL) --chip esp32 --port $(PORT) --baud $(BAUD) erase_flash
+	$(Q)$(ESPTOOL) --before no_reset --after no_reset --chip esp32 --port $(PORT) --baud $(BAUD) erase_flash
 
 ################################################################################
 # Declarations to build the application
