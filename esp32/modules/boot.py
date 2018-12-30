@@ -28,7 +28,8 @@ else:
 try:
     if not splash=="shell":
         import post_ota
-        if (badge.nvs_get_u8('badge', 'setup.state', 0) < 3):
+        #if (badge.nvs_get_u8('badge', 'setup.state', 0) < 3):
+        if False:
             import firstboot
         else:
             if splash.startswith('bpp '):

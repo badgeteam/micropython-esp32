@@ -1,16 +1,16 @@
-import ugfx, esp, badge, deepsleep, term
+import ugfx, esp, badge, deepsleep, term, disobey
 
 def start_app(app, display = True):
 	if display:
-		ugfx.clear(ugfx.WHITE)
-		ugfx.string(0, 0, "Loading...", "PermanentMarker22", ugfx.BLACK)
+		disobey.lcd.clear()
+		disobey.fb.text("Loading...", 0, 0, 1)
 		if app:
 			term.header(True, "Loading application "+app+"...")
-			ugfx.string(0,  25, "Starting "+app+"...","Roboto_Regular12",ugfx.BLACK)
+			disobey.fb.text(app, 0, 10, 1)
 		else:
 			term.header(True, "Returning to the main menu...")
-			ugfx.string(0,  25, "Returning to homescreen...","Roboto_Regular12",ugfx.BLACK)
-		ugfx.flush(ugfx.LUT_FASTER)
+			disobey.fb.text("Homescreen", 0, 10, 1)
+		disobey.fb_write()
 	esp.rtcmem_write_string(app)
 	deepsleep.reboot()
 

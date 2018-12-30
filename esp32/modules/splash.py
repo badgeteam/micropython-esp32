@@ -19,6 +19,7 @@ import deepsleep as ds
 import version
 import orientation
 import term_menu
+import disobey
 
 class Splash:
 	redraw = True
@@ -48,8 +49,7 @@ class Splash:
 		return 100
 	
 	def touch_flush(self):
-		while badge.read_input(0) > 0:
-			pass
+		pass
 	
 	def home(self):
 		self.redraw = True
@@ -85,39 +85,37 @@ class Splash:
 		app.start_app("swap_orientation")
 		
 	def menu_draw(self, title, items, selected):
-		ugfx.clear(ugfx.WHITE)
-		ugfx.string(5, 13*0, title,'Roboto_Regular12',ugfx.BLACK)
-		ugfx.string(5, 13*1, "---------------------",'Roboto_Regular12',ugfx.BLACK)
+		disobey.lcd.clear()
+		disobey.fb.text(title, 0, 0, 1)
+		disobey.fb.text("---------", 0, 10, 1)
 		y = 2
 		for i in range(0, len(items)):
 			text = "  "+items[i]
 			if selected == i:
 				text = "> "+items[i]
-			ugfx.string(5, 13*y, text,'Roboto_Regular12',ugfx.BLACK)
+			disobey.fb.text(text, 0, 10*y, 1)
 			y += 1
-		ugfx.flush()
+		disobey.fb_write()
 		
 		
 	def menu_task(self):
-		i = badge.read_input(0)
+		i = disobey.read_buttons()
 		if i > 0:
 			pm.feed()
-		if i == 1: #Up
+		if i == disobey.BTN_UP: #Up
 			if (self.menu_selected>0):
 				self.menu_selected -= 1
 				self.redraw = True
-		if i == 2: #Down
+		if i == disobey.BTN_DOWN: #Down
 			if (self.menu_selected<len(self.menu_items)-1):
 				self.menu_selected += 1
 				self.redraw = True
-		if i == 6 or i == 9: #A or START
+		if i == disobey.BTN_OK: #OK
 			self.menu_callbacks[self.menu_selected]()
 			return -1
-		if i == 7: #B
+		if i == disobey.BTN_BACK: #B
 			self.menu_callbacks[len(self.menu_callbacks)-1]() #Run last callback
 			return -1
-		if i > 0:
-			self.touch_flush()
 		if self.redraw:
 			self.menu_draw(self.menu_title, self.menu_items, self.menu_selected)
 			self.redraw = False
@@ -150,23 +148,25 @@ class Splash:
 	
 	def screen_main(self, init=False):
 		# Homescreen for normally booted badges
-		ugfx.clear(ugfx.WHITE)
+		disobey.lcd.clear()
 		draw.nickname(0)
-		ugfx.string(5, 40, 'Welcome! Press start to open the menu.','Roboto_Regular12',ugfx.BLACK)
+		disobey.fb.text("Welcome!",0,0,1)
 		if not init:
-			ugfx.flush()
+			disobey.fb_write()
 	
 	def on_sleep(self, idleTime):
 		# Executed before the badge goes to sleep
-		ugfx.clear(ugfx.WHITE)
+		disobey.dev.backlight(0)
+		disobey.lcd.clear()
 		draw.nickname(0)
 		services.force_draw()
 		services.stop()
 		self.leds_off()
-		ugfx.flush()
+		disobey.fb_write()
 		ds.start_sleeping(idleTime) #Seems double (pm does this as well) but needed for uart menu
 	
 	def main(self):
+		disobey.dev.backlight(255)
 		print("[SPLASH] main")
 		orientation.default()
 		safe = badge.safe_mode()

@@ -1,6 +1,6 @@
 vbuild                 = 18
 name                   = "Mystery Meat"
-badge_name             = "SHA2017"
+badge_name             = "DISOBEY"
 default_orientation    = 0
 
 font_header            = "PermanentMarker22"

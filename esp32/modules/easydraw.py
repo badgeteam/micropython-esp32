@@ -3,7 +3,7 @@
 # License: MIT
 # Authors: Renze Nicolai <renze@rnplus.nl>
 
-import ugfx, badge, version
+import ugfx, badge, version, disobey
 
 # Functions
 def msg(message, title = 'Loading...', reset = False):
@@ -18,37 +18,17 @@ def msg(message, title = 'Loading...', reset = False):
         if reset:
             raise exception
     except:
-        ugfx.clear(ugfx.WHITE)
-        ugfx.string(0, 0, title, version.font_header, ugfx.BLACK)
+        disobey.lcd.clear()
+        disobey.fb.text(title, 0, 0, 1)
         messageHistory = []
 
-    if len(messageHistory)<6:
-        ugfx.string(0, 30 + (len(messageHistory) * 15), message, version.font_default, ugfx.BLACK)
-        messageHistory.append(message)
-    else:
-        messageHistory.pop(0)
-        messageHistory.append(message)
-        ugfx.area(0,30, 296, 98, ugfx.WHITE)
-        for i, message in enumerate(messageHistory):
-            ugfx.string(0, 30 + (i * 15), message, version.font_default, ugfx.BLACK)
+    disobey.fb.text(message, 0, 10, 1)
 
-    ugfx.flush(ugfx.LUT_FASTER)
+    disobey.fb_write()
 
 def nickname(y = 25, font = version.font_nickname_large, color = ugfx.BLACK, split = version.nick_width_large, height = version.nick_height_large):
 	nick = badge.nvs_get_str("owner", "name", 'Henk de Vries')
-	if ugfx.orientation() != 0:
-		split = version.nick_width_small
-		if font == version.font_nickname_large:
-			font = version.font_nickname_small
-			height = version.nick_height_small
-		lines = lineSplit(nick, split)
-		print("Nickname",split,font,lines,y,height)
-		for i in range(0, len(lines)):
-			print("string_box",0, y+height*i, ugfx.width(), height, lines[i], font, color, ugfx.justifyCenter)
-			ugfx.string_box(0, y+height*i, ugfx.width(), height, lines[i], font, color, ugfx.justifyCenter)
-	else:
-		#New method is bugged out for old situation so... hack!
-		ugfx.string_box(0, y, ugfx.width(), height, nick, font, color, ugfx.justifyCenter)
+	disobey.fb.text(nick, 0, 54, 1)
 
 def battery(on_usb, vBatt, charging):
     vMin = badge.nvs_get_u16('batt', 'vmin', 3500) # mV
