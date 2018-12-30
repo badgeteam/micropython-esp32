@@ -1,5 +1,5 @@
 # This file is executed on every boot (including wake-boot from deepsleep)
-import badge, machine, esp, ugfx, sys, time
+import badge, machine, esp, ugfx, sys, time, easydraw, appglue
 badge.init()
 ugfx.init()
 
@@ -44,7 +44,6 @@ try:
         ugfx.flush(ugfx.LUT_FULL)
 except BaseException as e:
     sys.print_exception(e)
-    import easydraw
     easydraw.msg("A fatal error occured!","Still Crashing Anyway", True)
     easydraw.msg("")
 
@@ -59,7 +58,5 @@ except BaseException as e:
     easydraw.msg(str(e))
     easydraw.msg("")
     easydraw.msg("Rebooting in 5 seconds...")
-    import time
     time.sleep(5)
-    import appglue
     appglue.home()

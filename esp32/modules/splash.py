@@ -30,18 +30,17 @@ class Splash:
 		self.umenu = term_menu.UartMenu(self, badge.safe_mode())
 			
 	def leds_off(self):
-		output = [0]*4*6
-		badge.leds_send_data(bytes(output),24)
-		badge.leds_disable()
+		for i in range(6):
+			disobey.dev.led(i,0,0,0)
 	
 	def task_main(self):
 		if self.redraw:
 			self.screen_main()
 			self.redraw = False
-		i = badge.read_input(0)
+		i = disobey.dev.read_buttons()
 		if i > 0:
 			pm.feed()
-		if i == 9: #Start button
+		if i == (1<<disobey.dev.BTN_OK): #OK button
 			services.stop()
 			self.leds_off()
 			self.menu_main()
@@ -85,7 +84,7 @@ class Splash:
 		app.start_app("swap_orientation")
 		
 	def menu_draw(self, title, items, selected):
-		disobey.lcd.clear()
+		disobey.fb.fill(0)
 		disobey.fb.text(title, 0, 0, 1)
 		disobey.fb.text("---------", 0, 10, 1)
 		y = 2
@@ -99,21 +98,21 @@ class Splash:
 		
 		
 	def menu_task(self):
-		i = disobey.read_buttons()
+		i = disobey.dev.read_buttons()
 		if i > 0:
 			pm.feed()
-		if i == disobey.BTN_UP: #Up
+		if i == (1<<disobey.dev.BTN_UP): #Up
 			if (self.menu_selected>0):
 				self.menu_selected -= 1
 				self.redraw = True
-		if i == disobey.BTN_DOWN: #Down
+		if i == (1<<disobey.dev.BTN_DOWN): #Down
 			if (self.menu_selected<len(self.menu_items)-1):
 				self.menu_selected += 1
 				self.redraw = True
-		if i == disobey.BTN_OK: #OK
+		if i == (1<<disobey.dev.BTN_OK): #OK
 			self.menu_callbacks[self.menu_selected]()
 			return -1
-		if i == disobey.BTN_BACK: #B
+		if i == (1<<disobey.dev.BTN_BACK): #B
 			self.menu_callbacks[len(self.menu_callbacks)-1]() #Run last callback
 			return -1
 		if self.redraw:
@@ -148,7 +147,7 @@ class Splash:
 	
 	def screen_main(self, init=False):
 		# Homescreen for normally booted badges
-		disobey.lcd.clear()
+		disobey.fb.fill(0)
 		draw.nickname(0)
 		disobey.fb.text("Welcome!",0,0,1)
 		if not init:
@@ -157,7 +156,7 @@ class Splash:
 	def on_sleep(self, idleTime):
 		# Executed before the badge goes to sleep
 		disobey.dev.backlight(0)
-		disobey.lcd.clear()
+		disobey.fb.fill(0)
 		draw.nickname(0)
 		services.force_draw()
 		services.stop()

@@ -3,11 +3,12 @@
 # License: MIT
 # Authors: Renze Nicolai <renze@rnplus.nl>
 
-import badge, version, disobey
+import badge
+import version
+import disobey
 
-# Functions
 def msg(message, title = 'Loading...', reset = False):
-	disobey.lcd.clear()
+	disobey.fb.fill(0)
 	disobey.fb.text(title, 0, 0, 1)
 	disobey.fb.text(message, 0, 10, 1)
 	disobey.fb_write()

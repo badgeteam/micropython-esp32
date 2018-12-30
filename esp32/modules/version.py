@@ -1,5 +1,5 @@
 vbuild                 = 18
-name                   = "Mystery Meat"
+name                   = "6AM :D"
 badge_name             = "DISOBEY"
 default_orientation    = 0
 

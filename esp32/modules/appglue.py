@@ -2,7 +2,7 @@ import ugfx, esp, badge, deepsleep, term, disobey
 
 def start_app(app, display = True):
 	if display:
-		disobey.lcd.clear()
+		disobey.fb.fill(0)
 		disobey.fb.text("Loading...", 0, 0, 1)
 		if app:
 			term.header(True, "Loading application "+app+"...")

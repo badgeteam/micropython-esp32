@@ -1,6 +1,7 @@
 from machine import I2C
 from machine import Pin
 import ERC12864
+import framebuf
 
 class Samd():
 	ADDR = 48
