@@ -314,6 +314,8 @@ STATIC mp_obj_t badge_safe_mode() {
 STATIC MP_DEFINE_CONST_FUN_OBJ_0(badge_safe_mode_obj, badge_safe_mode);
 // E-Ink (badge_eink.h)
 
+#if defined(PIN_NUM_EPD_RESET)
+
 STATIC mp_obj_t badge_eink_init_() {
   badge_eink_init(BADGE_EINK_DEFAULT);
   return mp_const_none;
@@ -331,7 +333,6 @@ STATIC mp_obj_t badge_eink_wakeup_() {
   return mp_const_none;
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_0(badge_eink_wakeup_obj, badge_eink_wakeup_);
-
 
 /**
 #define NUM_PICTURES 7
@@ -361,7 +362,6 @@ STATIC MP_DEFINE_CONST_FUN_OBJ_2(badge_display_picture_obj,
    return mp_const_none;
  }
  STATIC MP_DEFINE_CONST_FUN_OBJ_0(badge_eink_busy_wait_obj, badge_eink_busy_wait_);
-
 
 /* PNG READER TEST */
 
@@ -533,6 +533,7 @@ STATIC mp_obj_t badge_eink_display_raw(mp_obj_t obj_img, mp_obj_t obj_flags)
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_2(badge_eink_display_raw_obj, badge_eink_display_raw);
 
+#endif
 
 // Power (badge_power.h)
 
@@ -826,9 +827,16 @@ STATIC const mp_rom_map_elem_t badge_module_globals_table[] = {
 #endif // I2C_MPR121_ADDR
 
     // E-Ink
+#ifdef PIN_NUM_EPD_RESET
     {MP_ROM_QSTR(MP_QSTR_eink_init), MP_ROM_PTR(&badge_eink_init_obj)},
     {MP_ROM_QSTR(MP_QSTR_eink_deep_sleep), MP_ROM_PTR(&badge_eink_deep_sleep_obj)},
     {MP_ROM_QSTR(MP_QSTR_eink_wakeup), MP_ROM_PTR(&badge_eink_wakeup_obj)},
+    {MP_ROM_QSTR(MP_QSTR_eink_busy), MP_ROM_PTR(&badge_eink_busy_obj)},
+    {MP_ROM_QSTR(MP_QSTR_eink_busy_wait), MP_ROM_PTR(&badge_eink_busy_wait_obj)},
+    {MP_ROM_QSTR(MP_QSTR_eink_png), MP_ROM_PTR(&badge_eink_png_obj)},
+    {MP_ROM_QSTR(MP_QSTR_eink_png_info), MP_ROM_PTR(&badge_eink_png_info_obj)},
+    {MP_ROM_QSTR(MP_QSTR_eink_display_raw), MP_ROM_PTR(&badge_eink_display_raw_obj)},
+#endif
 
     // Power
     {MP_OBJ_NEW_QSTR(MP_QSTR_power_init), (mp_obj_t)&badge_power_init_obj},
@@ -873,13 +881,6 @@ STATIC const mp_rom_map_elem_t badge_module_globals_table[] = {
     {MP_OBJ_NEW_QSTR(MP_QSTR_read_touch), (mp_obj_t)&badge_read_touch_obj},
     {MP_OBJ_NEW_QSTR(MP_QSTR_read_state), (mp_obj_t)&badge_read_state_obj},
 #endif
-
-    {MP_ROM_QSTR(MP_QSTR_eink_busy), MP_ROM_PTR(&badge_eink_busy_obj)},
-    {MP_ROM_QSTR(MP_QSTR_eink_busy_wait), MP_ROM_PTR(&badge_eink_busy_wait_obj)},
-
-    {MP_ROM_QSTR(MP_QSTR_eink_png), MP_ROM_PTR(&badge_eink_png_obj)},
-    {MP_ROM_QSTR(MP_QSTR_eink_png_info), MP_ROM_PTR(&badge_eink_png_info_obj)},
-    {MP_ROM_QSTR(MP_QSTR_eink_display_raw), MP_ROM_PTR(&badge_eink_display_raw_obj)},
 
 /*
     {MP_ROM_QSTR(MP_QSTR_display_picture), MP_ROM_PTR(&badge_display_picture_obj)},
