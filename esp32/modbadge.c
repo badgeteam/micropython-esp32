@@ -40,6 +40,7 @@
 
 #include "badge_i2c.h"
 #include "badge_mpr121.h"
+#include "badge_disobey_samd.h"
 #include "badge_input.h"
 
 #include "py/mperrno.h"
@@ -216,7 +217,6 @@ STATIC MP_DEFINE_CONST_FUN_OBJ_3(badge_nvs_set_u16_obj, badge_nvs_set_u16_);
 
 
 // I2C (badge_i2c.h)
-#if 0
 STATIC mp_obj_t badge_i2c_read_reg_(mp_obj_t _addr, mp_obj_t _reg, mp_obj_t _len) {
 	int addr = mp_obj_get_int(_addr);
 	int reg  = mp_obj_get_int(_reg);
@@ -277,7 +277,6 @@ STATIC mp_obj_t badge_i2c_write_reg_(mp_obj_t _addr, mp_obj_t _reg, mp_obj_t _da
 	return mp_const_none;
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_3(badge_i2c_write_reg_obj, badge_i2c_write_reg_);
-#endif
 
 // Mpr121 (badge_mpr121.h)
 #ifdef I2C_MPR121_ADDR
@@ -637,6 +636,54 @@ STATIC mp_obj_t badge_vibrator_activate_(mp_uint_t n_args, const mp_obj_t *args)
 STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(badge_vibrator_activate_obj, 1,1 ,badge_vibrator_activate_);
 #endif
 
+#if defined(I2C_DISOBEY_SAMD_ADDR)
+STATIC mp_obj_t badge_backlight(mp_uint_t n_args, const mp_obj_t *args) {
+  badge_disobey_samd_write_backlight(mp_obj_get_int(args[0]));
+  return mp_const_none;
+}
+STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(badge_backlight_obj, 1, 1, badge_backlight);
+
+STATIC mp_obj_t badge_led(mp_uint_t n_args, const mp_obj_t *args) {
+  badge_disobey_samd_write_led(mp_obj_get_int(args[0]),mp_obj_get_int(args[1]),mp_obj_get_int(args[2]),mp_obj_get_int(args[3]));
+  return mp_const_none;
+}
+STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(badge_led_obj, 4, 4, badge_led);
+
+STATIC mp_obj_t badge_buzzer(mp_uint_t n_args, const mp_obj_t *args) {
+  badge_disobey_samd_write_buzzer(mp_obj_get_int(args[0]),mp_obj_get_int(args[1]));
+  return mp_const_none;
+}
+STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(badge_buzzer_obj, 2, 2, badge_buzzer);
+
+STATIC mp_obj_t badge_off() {
+  badge_disobey_samd_write_off();
+  return mp_const_none;
+}
+STATIC MP_DEFINE_CONST_FUN_OBJ_0(badge_off_obj, badge_off);
+
+STATIC mp_obj_t badge_read_usb() {
+  return mp_obj_new_int(badge_disobey_samd_read_usb());
+}
+STATIC MP_DEFINE_CONST_FUN_OBJ_0(badge_read_usb_obj, badge_read_usb);
+
+STATIC mp_obj_t badge_read_battery() {
+  return mp_obj_new_int(badge_disobey_samd_read_battery());
+}
+STATIC MP_DEFINE_CONST_FUN_OBJ_0(badge_read_battery_obj, badge_read_battery);
+
+STATIC mp_obj_t badge_read_touch() {
+  return mp_obj_new_int(badge_disobey_samd_read_touch());
+}
+STATIC MP_DEFINE_CONST_FUN_OBJ_0(badge_read_touch_obj, badge_read_touch);
+
+STATIC mp_obj_t badge_read_state() {
+  return mp_obj_new_int(badge_disobey_samd_read_state());
+}
+STATIC MP_DEFINE_CONST_FUN_OBJ_0(badge_read_state_obj, badge_read_state);
+
+
+#endif
+
 
 // Mounts
 static bool root_mounted = false;
@@ -770,10 +817,8 @@ STATIC const mp_rom_map_elem_t badge_module_globals_table[] = {
     {MP_ROM_QSTR(MP_QSTR_init), MP_ROM_PTR(&badge_init_obj)},
 
     // I2C
-#if 0
     {MP_ROM_QSTR(MP_QSTR_i2c_read_reg), MP_ROM_PTR(&badge_i2c_read_reg_obj)},
     {MP_ROM_QSTR(MP_QSTR_i2c_write_reg), MP_ROM_PTR(&badge_i2c_write_reg_obj)},
-#endif
 
     // Mpr121
 #ifdef I2C_MPR121_ADDR
@@ -818,6 +863,17 @@ STATIC const mp_rom_map_elem_t badge_module_globals_table[] = {
     {MP_OBJ_NEW_QSTR(MP_QSTR_vibrator_activate), (mp_obj_t)&badge_vibrator_activate_obj},
 #endif
 
+#if defined(I2C_DISOBEY_SAMD_ADDR)
+    {MP_OBJ_NEW_QSTR(MP_QSTR_backlight), (mp_obj_t)&badge_backlight_obj},
+    {MP_OBJ_NEW_QSTR(MP_QSTR_led), (mp_obj_t)&badge_led_obj},
+    {MP_OBJ_NEW_QSTR(MP_QSTR_buzzer), (mp_obj_t)&badge_buzzer_obj},
+    {MP_OBJ_NEW_QSTR(MP_QSTR_off), (mp_obj_t)&badge_off_obj},
+    {MP_OBJ_NEW_QSTR(MP_QSTR_read_usb), (mp_obj_t)&badge_read_usb_obj},
+    {MP_OBJ_NEW_QSTR(MP_QSTR_read_battery), (mp_obj_t)&badge_read_battery_obj},
+    {MP_OBJ_NEW_QSTR(MP_QSTR_read_touch), (mp_obj_t)&badge_read_touch_obj},
+    {MP_OBJ_NEW_QSTR(MP_QSTR_read_state), (mp_obj_t)&badge_read_state_obj},
+#endif
+
     {MP_ROM_QSTR(MP_QSTR_eink_busy), MP_ROM_PTR(&badge_eink_busy_obj)},
     {MP_ROM_QSTR(MP_QSTR_eink_busy_wait), MP_ROM_PTR(&badge_eink_busy_wait_obj)},
 
@@ -836,7 +892,7 @@ STATIC const mp_rom_map_elem_t badge_module_globals_table[] = {
     {MP_OBJ_NEW_QSTR(MP_QSTR_mount_bpp), (mp_obj_t)&badge_mount_bpp_obj},
 
     {MP_OBJ_NEW_QSTR(MP_QSTR_safe_mode), (mp_obj_t)&badge_safe_mode_obj},
-    
+
     {MP_OBJ_NEW_QSTR(MP_QSTR_read_input), (mp_obj_t)&badge_read_input_obj},
 
 };
