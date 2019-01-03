@@ -5,17 +5,17 @@
 
 import badge
 import version
-import disobey
+import lcd
 
 def msg(message, title = 'Loading...', reset = False):
-	disobey.fb.fill(0)
-	disobey.fb.text(title, 0, 0, 1)
-	disobey.fb.text(message, 0, 10, 1)
-	disobey.fb_write()
+	lcd.fb.fill(0)
+	lcd.fb.text(title, 0, 0, 1)
+	lcd.fb.text(message, 0, 10, 1)
+	lcd.write()
 
 def nickname(y = 25, font = 0, color = 0, split = version.nick_width_large, height = version.nick_height_large):
 	nick = badge.nvs_get_str("owner", "name", 'Henk de Vries')
-	disobey.fb.text(nick, 0, 54, 1)
+	lcd.fb.text(nick, 0, 54, 1)
 
 def battery(on_usb, vBatt, charging):
 	pass

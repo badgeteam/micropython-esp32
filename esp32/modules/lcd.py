@@ -7,4 +7,4 @@ fb = framebuf.FrameBuffer(_fb_buf, 128, 64, framebuf.MONO_VLSB)
 
 def write():
 	global fb_buf
-	badge.lcdWrite(_fb_buf)
+	badge.lcd_display_raw(bytes(_fb_buf))

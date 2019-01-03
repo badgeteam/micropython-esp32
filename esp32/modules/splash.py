@@ -19,7 +19,7 @@ import deepsleep as ds
 import version
 import orientation
 import term_menu
-import disobey
+import lcd
 
 class Splash:
 	redraw = True
@@ -31,22 +31,17 @@ class Splash:
 			
 	def leds_off(self):
 		for i in range(6):
-			disobey.dev.led(i,0,0,0)
-	
-	def wait_for_buttons(self):
-		while (disobey.dev.read_buttons() > 0):
-			pm.feed()
-			time.sleep(0.01)
+			badge.led(i,0,0,0)
 	
 	def task_main(self):
 		if self.redraw:
 			self.screen_main()
 			self.redraw = False
-		i = disobey.dev.read_buttons()
+		i = badge.read_input()
 		if i > 0:
 			pm.feed()
-		if i == (1<<disobey.dev.BTN_OK): #OK button
-			self.wait_for_buttons()
+		BTN_OK = 1
+		if i == (1<<BTN_OK): #OK button
 			services.stop()
 			self.leds_off()
 			self.menu_main()
@@ -90,36 +85,39 @@ class Splash:
 		app.start_app("swap_orientation")
 		
 	def menu_draw(self, title, items, selected):
-		disobey.fb.fill(0)
-		disobey.fb.text(title, 0, 0, 1)
-		disobey.fb.text("---------", 0, 10, 1)
+		lcd.fb.fill(0)
+		lcd.fb.text(title, 0, 0, 1)
+		lcd.fb.text("---------", 0, 10, 1)
 		y = 2
 		for i in range(0, len(items)):
 			text = "  "+items[i]
 			if selected == i:
 				text = "> "+items[i]
-			disobey.fb.text(text, 0, 10*y, 1)
+			lcd.fb.text(text, 0, 10*y, 1)
 			y += 1
-		disobey.fb_write()
+		lcd.write()
 		
 		
 	def menu_task(self):
-		i = disobey.dev.read_buttons()
+		i = badge.read_input()
 		if i > 0:
 			pm.feed()
-			self.wait_for_buttons()
-		if i == (1<<disobey.dev.BTN_UP): #Up
+		BTN_UP = 2
+		BTN_OK = 4
+		BTN_BACK = 3
+		BTN_DOWN = 5
+		if i == (1<<BTN_UP): #Up
 			if (self.menu_selected>0):
 				self.menu_selected -= 1
 				self.redraw = True
-		if i == (1<<disobey.dev.BTN_DOWN): #Down
+		if i == (1<<BTN_DOWN): #Down
 			if (self.menu_selected<len(self.menu_items)-1):
 				self.menu_selected += 1
 				self.redraw = True
-		if i == (1<<disobey.dev.BTN_OK): #OK
+		if i == (1<<BTN_OK): #OK
 			self.menu_callbacks[self.menu_selected]()
 			return -1
-		if i == (1<<disobey.dev.BTN_BACK): #B
+		if i == (1<<BTN_BACK): #B
 			self.menu_callbacks[len(self.menu_callbacks)-1]() #Run last callback
 			return -1
 		if self.redraw:
@@ -154,25 +152,25 @@ class Splash:
 	
 	def screen_main(self, init=False):
 		# Homescreen for normally booted badges
-		disobey.fb.fill(0)
+		lcd.fb.fill(0)
 		draw.nickname(0)
-		disobey.fb.text("Welcome!",0,0,1)
+		lcd.fb.text("Welcome!",0,0,1)
 		if not init:
-			disobey.fb_write()
+			lcd.write()
 	
 	def on_sleep(self, idleTime):
 		# Executed before the badge goes to sleep
-		disobey.dev.backlight(0)
-		disobey.fb.fill(0)
+		badge.backlight(0)
+		lcd.fb.fill(0)
 		draw.nickname(0)
 		services.force_draw()
 		services.stop()
 		self.leds_off()
-		disobey.fb_write()
+		lcd.write()
 		ds.start_sleeping(idleTime) #Seems double (pm does this as well) but needed for uart menu
 	
 	def main(self):
-		disobey.dev.backlight(255)
+		badge.backlight(255)
 		print("[SPLASH] main")
 		orientation.default()
 		safe = badge.safe_mode()

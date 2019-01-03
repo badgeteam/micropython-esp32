@@ -16,5 +16,5 @@ fb.text("Hello, world!", 0, 0, 1)
 #fontWriter.printstring("Roboto 12 test")
 
 #Send to the LCD
-disobey.dev.backlight(255)
-disobey.lcd.write(buf)
+badge.backlight(255);
+badge.lcd_display_raw(buf);

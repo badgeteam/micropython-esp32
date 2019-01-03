@@ -41,6 +41,7 @@
 #include "badge_i2c.h"
 #include "badge_mpr121.h"
 #include "badge_disobey_samd.h"
+#include "badge_erc12864.h"
 #include "badge_input.h"
 
 #include "py/mperrno.h"
@@ -535,6 +536,41 @@ STATIC MP_DEFINE_CONST_FUN_OBJ_2(badge_eink_display_raw_obj, badge_eink_display_
 
 #endif
 
+#if defined(I2C_ERC12864_ADDR)
+
+STATIC mp_obj_t badge_lcd_display_raw(mp_obj_t obj_img)
+{
+	bool is_bytes = MP_OBJ_IS_TYPE(obj_img, &mp_type_bytes);
+
+	if (!is_bytes) {
+		mp_raise_msg(&mp_type_AttributeError, "First argument should be a bytestring");
+	}
+
+	// convert the input buffer into a byte array
+	mp_uint_t len;
+	uint8_t *buffer = (uint8_t *)mp_obj_str_get_data(obj_img, &len);
+
+	if (len != BADGE_ERC12864_DATA_LENGTH) {
+		mp_raise_msg(&mp_type_AttributeError, "First argument has wrong length");
+	}
+
+	// display the image directly
+	badge_erc12864_write(buffer);
+
+	return mp_const_none;
+}
+STATIC MP_DEFINE_CONST_FUN_OBJ_1(badge_lcd_display_raw_obj, badge_lcd_display_raw);
+
+STATIC mp_obj_t badge_lcd_set_rotation(mp_obj_t obj_rotation)
+{
+	badge_erc12864_set_rotation(mp_obj_get_int(obj_rotation));
+	return mp_const_none;
+}
+
+STATIC MP_DEFINE_CONST_FUN_OBJ_1(badge_lcd_set_rotation_obj, badge_lcd_set_rotation);
+
+#endif
+
 // Power (badge_power.h)
 
 STATIC mp_obj_t badge_power_init_() {
@@ -836,6 +872,11 @@ STATIC const mp_rom_map_elem_t badge_module_globals_table[] = {
     {MP_ROM_QSTR(MP_QSTR_eink_png), MP_ROM_PTR(&badge_eink_png_obj)},
     {MP_ROM_QSTR(MP_QSTR_eink_png_info), MP_ROM_PTR(&badge_eink_png_info_obj)},
     {MP_ROM_QSTR(MP_QSTR_eink_display_raw), MP_ROM_PTR(&badge_eink_display_raw_obj)},
+#endif
+
+#ifdef I2C_ERC12864_ADDR
+    {MP_ROM_QSTR(MP_QSTR_lcd_display_raw), MP_ROM_PTR(&badge_lcd_display_raw_obj)},
+    {MP_ROM_QSTR(MP_QSTR_lcd_set_rotation), MP_ROM_PTR(&badge_lcd_set_rotation_obj)},
 #endif
 
     // Power

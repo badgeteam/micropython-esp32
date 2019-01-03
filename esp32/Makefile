@@ -679,6 +679,7 @@ BADGE_COMPONENTS_O = $(addprefix $(PROJECT_PATH)/components/,\
 	badge/badge_leds.o \
 	badge/badge_mpr121.o \
 	badge/badge_disobey_samd.o \
+	badge/badge_erc12864.o \
 	badge/badge_fxl6408.o \
 	badge/badge_gpiobutton.o \
 	badge/badge_cpt112s.o \
@@ -741,7 +742,7 @@ flash: $(BUILD)/firmware.bin
 	$(ECHO) "Writing $^ to the board"
 	$(Q)$(ESPTOOL) --before no_reset --after no_reset --port $(PORT) --baud $(BAUD) erase_region 0xd000 0x2000
 	$(Q)$(ESPTOOL) --before no_reset --after no_reset --port $(PORT) --baud $(BAUD) write_flash 0x10000 build/application.bin
-	
+
 flash1: $(BUILD)/firmware.bin
 	$(ECHO) "Writing $^ to the board"
 	$(Q)$(ESPTOOL) --before no_reset --after no_reset --port /dev/ttyACM1 --baud $(BAUD) erase_region 0xd000 0x2000
