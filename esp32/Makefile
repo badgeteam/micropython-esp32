@@ -25,8 +25,10 @@ FROZEN_MPY_DIR = modules
 # include py core make definitions
 include ../py/py.mk
 
-PORT ?= /dev/ttyACM0
-BAUD ?= 115200
+PORT ?= /dev/ttyUSB0
+BAUD ?= 921600
+DISOBEY_PORT ?= /dev/ttyACM0
+DISOBEY_BAUD ?= 115200
 FLASH_MODE ?= dio
 FLASH_FREQ ?= 80m
 FLASH_SIZE ?= 16MB
@@ -736,21 +738,30 @@ $(BUILD)/firmware.bin: $(BUILD)/bootloader.bin $(BUILD)/partitions.bin $(BUILD)/
 
 deploy: $(BUILD)/firmware.bin
 	$(ECHO) "Writing $^ to the board"
-	$(Q)$(ESPTOOL) --before no_reset --after no_reset --chip esp32 --port $(PORT) --baud $(BAUD) write_flash -z --flash_mode $(FLASH_MODE) --flash_freq $(FLASH_FREQ) 0x1000 $^
+	$(Q)$(ESPTOOL) --chip esp32 --port $(PORT) --baud $(BAUD) write_flash -z --flash_mode $(FLASH_MODE) --flash_freq $(FLASH_FREQ) 0x1000 $^
 
 flash: $(BUILD)/firmware.bin
 	$(ECHO) "Writing $^ to the board"
-	$(Q)$(ESPTOOL) --before no_reset --after no_reset --port $(PORT) --baud $(BAUD) erase_region 0xd000 0x2000
-	$(Q)$(ESPTOOL) --before no_reset --after no_reset --port $(PORT) --baud $(BAUD) write_flash 0x10000 build/application.bin
-
-flash1: $(BUILD)/firmware.bin
-	$(ECHO) "Writing $^ to the board"
-	$(Q)$(ESPTOOL) --before no_reset --after no_reset --port /dev/ttyACM1 --baud $(BAUD) erase_region 0xd000 0x2000
-	$(Q)$(ESPTOOL) --before no_reset --after no_reset --port /dev/ttyACM1 --baud $(BAUD) write_flash 0x10000 build/application.bin
+	$(Q)$(ESPTOOL) --port $(PORT) --baud $(BAUD) erase_region 0xd000 0x2000
+	$(Q)$(ESPTOOL) --port $(PORT) --baud $(BAUD) write_flash 0x10000 build/application.bin
 
 erase:
 	$(ECHO) "Erasing flash"
-	$(Q)$(ESPTOOL) --before no_reset --after no_reset --chip esp32 --port $(PORT) --baud $(BAUD) erase_flash
+	$(Q)$(ESPTOOL) --chip esp32 --port $(PORT) --baud $(BAUD) erase_flash
+
+deploy_disobey: $(BUILD)/firmware.bin
+	$(ECHO) "Writing $^ to the board"
+	$(Q)$(ESPTOOL) --before no_reset --after no_reset --chip esp32 --port $(DISOBEY_PORT) --baud $(DISOBEY_BAUD) write_flash -z --flash_mode $(FLASH_MODE) --flash_freq $(FLASH_FREQ) 0x1000 $^
+
+flash_disobey: $(BUILD)/firmware.bin
+	$(ECHO) "Writing $^ to the board"
+	$(Q)$(ESPTOOL) --before no_reset --after no_reset --port $(DISOBEY_PORT) --baud $(DISOBEY_BAUD) erase_region 0xd000 0x2000
+	$(Q)$(ESPTOOL) --before no_reset --after no_reset --port $(DISOBEY_PORT) --baud $(DISOBEY_BAUD) write_flash 0x10000 build/application.bin
+
+erase_disobey:
+	$(ECHO) "Erasing flash"
+	$(Q)$(ESPTOOL) --before no_reset --after no_reset --chip esp32 --port $(DISOBEY_PORT) --baud $(DISOBEY_BAUD) erase_flash
+
 
 ################################################################################
 # Declarations to build the application

@@ -1,4 +1,4 @@
-import framebuf, font_writer, font_roboto_12, badge, disobey
+import framebuf, font_writer, font_roboto_12, badge
 
 #Allocate a buffer
 buf = bytearray([0]*4736)

@@ -1,4 +1,4 @@
-import term, appglue, sys, badge, uos as os, ujson
+import helpers.term as term, appglue, sys, badge, uos as os, ujson
 
 apps = []
 
