@@ -21,7 +21,8 @@ def show_names():
 	print("Developers:")
 	for n in range(0, len(names)):
 		print(" - "+names[n])
-	
+	print("")
+	print("Showing names on e-ink...")
 	for n in range(0, len(names)):
 		draw_name(5,y,names[n])
 		y += 23
@@ -31,13 +32,18 @@ def show_names():
 			y = 10
 			time.sleep(1)
 			ugfx.clear()
+	ugfx.clear()
+	time.sleep(1)
+	draw_name(5,10,"Thank you!")
+	print("Thank you!")
+	
 
 def main():
     ugfx.input_init()
     ugfx.input_attach(ugfx.BTN_B, action_exit)
     ugfx.input_attach(ugfx.BTN_START, action_exit)
     show_names()
-    sys.stdin.read(1) #Wait for any key
+    #sys.stdin.read(1) #Wait for any key
     action_exit(True)
     
 

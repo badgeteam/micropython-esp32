@@ -1,10 +1,12 @@
 vbuild                 = 18
-name                   = "At least it works now"
-badge_name             = "DISOBEY"
+name                   = "Mystery Meat"
+badge_name             = "SHA2017"
 default_orientation    = 0
 
 font_header            = "PermanentMarker22"
 font_default           = "Roboto_Regular12"
+
+message_max_lines      = 6
 
 font_nickname_large    = "PermanentMarker36"
 font_nickname_small    = "PermanentMarker22"

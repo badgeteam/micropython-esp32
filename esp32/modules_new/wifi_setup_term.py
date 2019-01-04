@@ -1,4 +1,4 @@
-import network, term, appglue, sys, badge
+import network, helpers.term as term, appglue, sys, badge
 
 def main():
 	term.empty_lines()

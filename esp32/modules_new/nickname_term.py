@@ -1,4 +1,4 @@
-import term, appglue, sys, badge
+import helpers.term as term, appglue, sys, badge
 
 term.empty_lines()
 nickname = badge.nvs_get_str("owner", "name", "")

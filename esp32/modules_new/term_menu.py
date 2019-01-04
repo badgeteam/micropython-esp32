@@ -1,4 +1,4 @@
-import term, badge, deepsleep as ds, tasks.powermanagement as pm, appglue as app
+import helpers.term as term, badge, deepsleep as ds, tasks.powermanagement as pm, appglue as app
 
 class UartMenu():
 	def __init__(self, parent, safe = False):
