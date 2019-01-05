@@ -1,197 +1,186 @@
 # File: splash.py
-# Description: App launcher & homescreen
+# Version: 6
+# Description: Homescreen for SHA2017 badge
 # License: MIT
-# Author: Renze Nicolai <renze@rnplus.nl>
+# Authors: Renze Nicolai <renze@rnplus.nl>
+#          Thomas Roos   <?>
 
-import ugfx, time, badge, machine, gc, sys
-import appglue as app
-import virtualtimers as vt
-import easydraw as draw
-import easywifi as wifi
-import easyrtc as rtc
+import ugfx, time, badge, machine, deepsleep, gc
+import appglue, virtualtimers
+import easydraw, easywifi, easyrtc
+
 import tasks.powermanagement as pm
 import tasks.otacheck as otac
 import tasks.resourcescheck as resc
 import tasks.sponsorscheck as spoc
 import tasks.services as services
-import term
-import deepsleep as ds
-import version
-import orientation
-import term_menu
-import lcd
 
-class Splash:
-	redraw = True
-	selected = 0
-	
-	def __init__(self):
-		print("[SPLASH] init")
-		self.umenu = term_menu.UartMenu(self, badge.safe_mode())
-			
-	def leds_off(self):
-		for i in range(6):
-			badge.led(i,0,0,0)
-	
-	def task_main(self):
-		if self.redraw:
-			self.screen_main()
-			self.redraw = False
-		i = badge.read_input()
-		if i > 0:
-			pm.feed()
-		BTN_OK = 1
-		if i == (1<<BTN_OK): #OK button
-			services.stop()
-			self.leds_off()
-			self.menu_main()
-			return -1
-		return 100
-	
-	def touch_flush(self):
-		pass
-	
-	def home(self):
-		self.redraw = True
-		self.touch_flush()
-		vt.delete(self.task_main)
-		vt.new(1, self.task_main, True)
-		services.setDrawCallback(self.screen_main)
-		services.start()
-		pm.feed()
-		
-	def go_to_sleep(self):
-		self.on_sleep(86400000)
-		
-	def opt_change_nickname(self):
-		app.start_app("setup")
-	
-	def opt_launcher(self):
-		app.start_app("launcher")
-	
-	def opt_configure_wifi(self):
-		app.start_app("wifi")
-		
-	def opt_ota(self):
-		app.start_ota()
-	
-	def opt_update_apps(self):
-		app.start_app("update")
-		
-	def opt_about(self):
-		app.start_app("about")
-		
-	def opt_swap_orientation(self):
-		app.start_app("swap_orientation")
-		
-	def menu_draw(self, title, items, selected):
-		lcd.fb.fill(0)
-		lcd.fb.text(title, 0, 0, 1)
-		lcd.fb.text("---------", 0, 10, 1)
-		y = 2
-		for i in range(0, len(items)):
-			text = "  "+items[i]
-			if selected == i:
-				text = "> "+items[i]
-			lcd.fb.text(text, 0, 10*y, 1)
-			y += 1
-		lcd.write()
-		
-		
-	def menu_task(self):
-		i = badge.read_input()
-		if i > 0:
-			pm.feed()
-		BTN_UP = 2
-		BTN_OK = 4
-		BTN_BACK = 3
-		BTN_DOWN = 5
-		if i == (1<<BTN_UP): #Up
-			if (self.menu_selected>0):
-				self.menu_selected -= 1
-				self.redraw = True
-		if i == (1<<BTN_DOWN): #Down
-			if (self.menu_selected<len(self.menu_items)-1):
-				self.menu_selected += 1
-				self.redraw = True
-		if i == (1<<BTN_OK): #OK
-			self.menu_callbacks[self.menu_selected]()
-			return -1
-		if i == (1<<BTN_BACK): #B
-			self.menu_callbacks[len(self.menu_callbacks)-1]() #Run last callback
-			return -1
-		if self.redraw:
-			self.menu_draw(self.menu_title, self.menu_items, self.menu_selected)
-			self.redraw = False
-		return 100
-		
-	def menu(self, title, items, callbacks):
-		self.redraw = True
-		self.touch_flush()
-		self.menu_items = items
-		self.menu_callbacks = callbacks
-		self.menu_selected = 0
-		self.menu_title = title
-		vt.delete(self.menu_task)
-		vt.new(1, self.menu_task, True)
+# Graphics
 
-	def menu_settings(self):
-		items = ["Change nickname", "Configure WiFi", "OTA update", "Update all apps", "< Return to main menu"]
-		callbacks = [self.opt_change_nickname, self.opt_configure_wifi, self.opt_ota, self.opt_update_apps,  self.menu_main, self.menu_main]
-		self.menu("Settings", items, callbacks)
-		
-	def menu_main(self):
-		items = ["Apps", "Settings", "About", "Power off"]
-		callbacks = [self.opt_launcher, self.menu_settings, self.opt_about, self.go_to_sleep, self.home]
-		self.menu("Main menu", items, callbacks)
-		
-	def menu_recovery(self):
-		items = ["Apps", "Change nickname", "Configure WiFi", "OTA update", "Update all apps", "Power off"]
-		callbacks = [self.opt_launcher, self.opt_change_nickname, self.opt_configure_wifi, self.opt_ota, self.opt_update_apps, self.go_to_sleep, self.menu_recovery]
-		self.menu("Recovery menu", items, callbacks)
-	
-	def screen_main(self, init=False):
-		# Homescreen for normally booted badges
-		lcd.fb.fill(0)
-		draw.nickname(0)
-		lcd.fb.text("Welcome!",0,0,1)
-		if not init:
-			lcd.write()
-	
-	def on_sleep(self, idleTime):
-		# Executed before the badge goes to sleep
-		badge.backlight(0)
-		lcd.fb.fill(0)
-		draw.nickname(0)
-		services.force_draw()
-		services.stop()
-		self.leds_off()
-		lcd.write()
-		ds.start_sleeping(idleTime) #Seems double (pm does this as well) but needed for uart menu
-	
-	def main(self):
-		badge.backlight(255)
-		print("[SPLASH] main")
-		orientation.default()
-		safe = badge.safe_mode()
-		print("[SPLASH] Safe mode? ", safe)
-		vt.activate(25)
-		
-		self.redraw = True
-		
-		if not safe:
-			pm.callback(self.on_sleep)
-			services.setup()
-			pm.enable()
-			self.home()
-		else:
-			pm.disable()
-			self.menu_recovery()
-		
-		self.umenu.main() # Jump to the serial port menu application
+def draw(mode, goingToSleep=False):
+    if mode:
+        # We flush the buffer and wait
+        ugfx.flush(ugfx.GREYSCALE)
+    else:
+        # We prepare the screen refresh
+        ugfx.clear(ugfx.WHITE)
+        if goingToSleep:
+            info1 = 'Sleeping...'
+            info2 = 'Press any key to wake up'
+        else:
+            info1 = 'Press start to open the launcher'
+            if otac.available(False):
+                info2 = 'Press select to start OTA update'
+            else:
+                info2 = ''
 
+	def disp_string_right(y, s):
+	    l = ugfx.get_string_width(s,"Roboto_Regular12")
+	    ugfx.string(296-l, y, s, "Roboto_Regular12",ugfx.BLACK)
 
-print("[MAIN] Welcome!")
-splash = Splash()
-splash.main()
-print("[MAIN] --- Application terminated ---")
+	disp_string_right(0, info1)
+	disp_string_right(12, info2)
+
+	if badge.safe_mode():
+	    disp_string_right(92, "Safe Mode - services disabled")
+	    disp_string_right(104, "Sleep disabled - will drain battery quickly")
+	    disp_string_right(116, "Press Reset button to exit")
+        
+        easydraw.nickname()
+        
+        on_usb = pm.usb_attached()
+        vBatt = badge.battery_volt_sense()
+        vBatt += vDrop
+        charging = badge.battery_charge_status()
+
+        easydraw.battery(on_usb, vBatt, charging)
+        
+        if vBatt>500:
+            ugfx.string(52, 0, str(round(vBatt/1000, 1)) + 'v','Roboto_Regular12',ugfx.BLACK)
+
+# About
+
+def splash_about_countdown_reset():
+    global splashAboutCountdown
+    splashAboutCountdown = badge.nvs_get_u8('splash', 'about.amount', 10)
+
+def splash_about_countdown_trigger():
+    global splashAboutCountdown
+    try:
+        splashAboutCountdown
+    except:
+        splash_about_countdown_reset()
+
+    splashAboutCountdown -= 1
+    if splashAboutCountdown<0:
+        appglue.start_app('magic', False)
+    else:
+        print("[SPLASH] Magic in "+str(splashAboutCountdown)+"...")
+
+# Button input
+
+def splash_input_start(pressed):
+    # Pressing start always starts the launcher
+    if pressed:
+        appglue.start_app("launcher", False)
+
+def splash_input_a(pressed):
+    if pressed:
+        splash_about_countdown_trigger()
+        pm.feed()
+
+def splash_input_select(pressed):
+    if pressed:
+        if otac.available(False):
+            appglue.start_ota()
+        pm.feed()
+
+def splash_input_other(pressed):
+    if pressed:
+        pm.feed()
+
+def splash_input_init():
+    print("[SPLASH] Inputs attached")
+    ugfx.input_init()
+    ugfx.input_attach(ugfx.BTN_START, splash_input_start)
+    ugfx.input_attach(ugfx.BTN_A, splash_input_a)
+    ugfx.input_attach(ugfx.BTN_B, splash_input_other)
+    ugfx.input_attach(ugfx.BTN_SELECT, splash_input_select)
+    ugfx.input_attach(ugfx.JOY_UP, splash_input_other)
+    ugfx.input_attach(ugfx.JOY_DOWN, splash_input_other)
+    ugfx.input_attach(ugfx.JOY_LEFT, splash_input_other)
+    ugfx.input_attach(ugfx.JOY_RIGHT, splash_input_other)
+
+# Power management
+ 
+def onSleep(idleTime):
+    draw(False, True)
+    services.force_draw(True)
+    draw(True, True)
+
+### PROGRAM
+
+# Calibrate battery voltage drop
+if badge.battery_charge_status() == False and pm.usb_attached() and badge.battery_volt_sense() > 2500:
+    badge.nvs_set_u16('splash', 'bat.volt.drop', 5200 - badge.battery_volt_sense()) # mV
+    print('Set vDrop to: ' + str(4200 - badge.battery_volt_sense()))
+vDrop = badge.nvs_get_u16('splash', 'bat.volt.drop', 1000) - 1000 # mV
+
+splash_input_init()
+splash_about_countdown_reset()
+
+# post ota script
+import post_ota
+
+setupState = badge.nvs_get_u8('badge', 'setup.state', 0)
+if setupState == 0: #First boot
+    print("[SPLASH] First boot (start setup)...")
+    appglue.start_app("setup")
+elif setupState == 1: # Second boot: Show sponsors
+    print("[SPLASH] Second boot (show sponsors)...")
+    badge.nvs_set_u8('badge', 'setup.state', 2)
+    spoc.show(True)
+elif setupState == 2: # Third boot: force OTA check
+    print("[SPLASH] Third boot (force ota check)...")
+    badge.nvs_set_u8('badge', 'setup.state', 3)
+    if not easywifi.failure():
+        otac.available(True)
+else: # Normal boot
+    print("[SPLASH] Normal boot... ("+str(machine.reset_cause())+")")
+    if (machine.reset_cause() != machine.DEEPSLEEP_RESET):
+        print("... from reset: checking for ota update")
+        if not easywifi.failure():
+            otac.available(True)
+
+# RTC ===
+if time.time() < 1482192000:
+    easyrtc.configure()
+# =======
+        
+if not easywifi.failure():
+    resc.check()        # Check resources
+if not easywifi.failure():
+    spoc.show(False)    # Check sponsors
+
+if badge.safe_mode():
+    draw(False)
+    services.force_draw()
+    draw(True)
+else:
+    have_services = services.setup(draw) # Start services
+    if not have_services:
+        draw(False)
+        services.force_draw()
+        draw(True)
+
+easywifi.disable()
+gc.collect()
+
+virtualtimers.activate(25)
+pm.callback(onSleep)
+pm.feed()
+
+print("----")
+print("WARNING: POWER MANAGEMENT ACTIVE")
+print("To use shell type 'import shell' within 5 seconds.")
+print("----")

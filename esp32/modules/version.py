@@ -1,5 +1,5 @@
 vbuild                 = 18
-name                   = "At least it works now"
+name                   = "......."
 badge_name             = "DISOBEY"
 default_orientation    = 0
 

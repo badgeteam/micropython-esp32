@@ -691,7 +691,7 @@ BADGE_COMPONENTS_O = $(addprefix $(PROJECT_PATH)/components/,\
 	badge/badge_power.o \
 	badge/badge_eink_dev.o \
 	badge/badge_eink_lut.o \
-	badge/badge_eink_fb.o \
+	badge/badge_fb.o \
 	badge/badge_nvs.o \
 	badge/badge.o \
 	graph/font.o \

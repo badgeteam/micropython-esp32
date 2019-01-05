@@ -28,15 +28,15 @@
 
 #include "modfreedomgfx_eink.h"
 #include <badge_eink.h>
-#include <badge_eink_fb.h>
+#include <badge_fb.h>
 #include <badge_input.h>
 
 extern bool ugfx_screen_flipped;
 
 uint8_t* freedomgfxInit(void)
 {
-	badge_eink_fb_init();
-	return badge_eink_fb;
+	badge_fb_init();
+	return badge_fb;
 }
 
 void freedomgfxDeinit(void)
@@ -55,5 +55,5 @@ void freedomgfxDraw()
 	badge_eink_flags_t flags = DISPLAY_FLAG_FULL_UPDATE | DISPLAY_FLAG_8BITPIXEL;
 	if(ugfx_screen_flipped)
 		flags |= DISPLAY_FLAG_ROTATE_180;
-	badge_eink_display(badge_eink_fb, flags);
+	badge_eink_display(badge_fb, flags);
 }

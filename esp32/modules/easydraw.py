@@ -1,39 +1,63 @@
 # File: easydraw.py
+# Version: 1
 # Description: Wrapper that makes drawing things simple
 # License: MIT
 # Authors: Renze Nicolai <renze@rnplus.nl>
 
-import badge
-import version
-import lcd
+import ugfx, badge
 
-def msg(message, title = 'Loading...', reset = False):
-	lcd.fb.fill(0)
-	lcd.fb.text(title, 0, 0, 1)
-	lcd.fb.text(message, 0, 10, 1)
-	lcd.write()
+# Functions
+def msg(message, title = 'Still Loading Anyway...', reset = False):
+    """Show a terminal style loading screen with title
 
-def nickname(y = 25, font = 0, color = 0, split = version.nick_width_large, height = version.nick_height_large):
-	nick = badge.nvs_get_str("owner", "name", 'Henk de Vries')
-	lcd.fb.text(nick, 0, 54, 1)
+    title can be optionaly set when resetting or first call
+    """
+    global messageHistory
+
+    try:
+        messageHistory
+        if reset:
+            raise exception
+    except:
+        ugfx.clear(ugfx.WHITE)
+        ugfx.string(0, 0, title, "PermanentMarker22", ugfx.BLACK)
+        messageHistory = []
+
+    if len(messageHistory)<6:
+        ugfx.string(0, 30 + (len(messageHistory) * 15), message, "Roboto_Regular12", ugfx.BLACK)
+        messageHistory.append(message)
+    else:
+        messageHistory.pop(0)
+        messageHistory.append(message)
+        ugfx.area(0,30, 296, 98, ugfx.WHITE)
+        for i, message in enumerate(messageHistory):
+            ugfx.string(0, 30 + (i * 15), message, "Roboto_Regular12", ugfx.BLACK)
+
+    ugfx.flush(ugfx.LUT_FASTER)
+
+def nickname(y = 25, font = "PermanentMarker36", color = ugfx.BLACK):
+    nick = badge.nvs_get_str("owner", "name", 'Henk de Vries')
+    ugfx.string_box(0,y,296,38, nick, font, color, ugfx.justifyCenter)
 
 def battery(on_usb, vBatt, charging):
-	pass
-
-def lineSplit(message, width):
-	words = message.split(" ")
-	lines = []
-	line = ""
-	for word in words:
-		if len(word) > width:
-			lines.append(line)
-			lines.append(word)
-			line = ""
-		elif len(line)+len(word) < width:
-			line += " "+word
-		else:
-			lines.append(line)
-			line = word
-	if len(line) > 0:
-		lines.append(line)
-	return lines
+    vMin = badge.nvs_get_u16('batt', 'vmin', 3500) # mV
+    vMax = badge.nvs_get_u16('batt', 'vmax', 4100) # mV
+    if charging and on_usb:
+        try:
+            badge.eink_png(0,0,'/lib/resources/chrg.png')
+        except:
+            ugfx.string(0, 0, "CHRG",'Roboto_Regular12',ugfx.BLACK)
+    elif on_usb:
+        try:
+            badge.eink_png(0,0,'/lib/resources/usb.png')
+        except:
+            ugfx.string(0, 0, "USB",'Roboto_Regular12',ugfx.BLACK)
+    else:
+        width = round((vBatt-vMin) / (vMax-vMin) * 44)
+        if width < 0:
+            width = 0
+        elif width > 38:
+            width = 38
+        ugfx.box(2,2,46,18,ugfx.BLACK)
+        ugfx.box(48,7,2,8,ugfx.BLACK)
+        ugfx.area(3,3,width,16,ugfx.BLACK)

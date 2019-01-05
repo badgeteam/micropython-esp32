@@ -193,9 +193,7 @@ void do_bpp_bgnd() {
 }
 
 void app_main(void) {
-#if 0
 	badge_check_first_run();
-#endif
 	badge_base_init();
 
 	uint8_t magic = esp_rtcmem_read(0);

@@ -87,23 +87,23 @@ def stop():
     timer.deinit()
         
 def timer_callback(tmr):
-	global scheduler
-	global period    
-	s = len(scheduler)
-	for i in range(0, len(scheduler)):
-		scheduler[i]["pos"] += period
-		if scheduler[i]["pos"] > scheduler[i]["target"]:
-			try:
-				newTarget = scheduler[i]["cb"]()
-			except BaseException as e:
-				print("[ERROR] An error occured in a task. Task disabled.")
-				sys.print_exception(e)
-				newTarget = -1
-			if newTarget > 0:
-				scheduler[i]["pos"] = 0
-				scheduler[i]["target"] = newTarget
-			else:
-				scheduler[i]["pos"] = -1
-				scheduler[i]["target"] = -1
-				
-	scheduler = list(task for task in scheduler if task["pos"]>=0)
+    global scheduler
+    global period    
+    s = len(scheduler)
+    for i in range(0, len(scheduler)):
+        scheduler[i]["pos"] += period
+        if scheduler[i]["pos"] > scheduler[i]["target"]:
+            try:
+                newTarget = scheduler[i]["cb"]()
+            except BaseException as e:
+                print("[ERROR] An error occured in a task. Task disabled.")
+                sys.print_exception(e)
+                newTarget = -1
+            if newTarget > 0:
+                scheduler[i]["pos"] = 0
+                scheduler[i]["target"] = newTarget
+            else:
+                scheduler[i]["pos"] = -1
+                scheduler[i]["target"] = -1
+                
+    scheduler = list(task for task in scheduler if task["pos"]>=0)

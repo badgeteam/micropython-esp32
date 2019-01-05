@@ -419,7 +419,7 @@ STATIC mp_obj_t badge_eink_png(mp_obj_t obj_x, mp_obj_t obj_y, mp_obj_t obj_file
 
 	uint32_t dst_min_x = x < 0 ? -x : 0;
 	uint32_t dst_min_y = y < 0 ? -y : 0;
-	int res = lib_png_load_image(pr, &badge_eink_fb[y * BADGE_EINK_WIDTH + x], dst_min_x, dst_min_y, BADGE_EINK_WIDTH - x, BADGE_EINK_HEIGHT - y, BADGE_EINK_WIDTH);
+	int res = lib_png_load_image(pr, &badge_fb[y * BADGE_EINK_WIDTH + x], dst_min_x, dst_min_y, BADGE_EINK_WIDTH - x, BADGE_EINK_HEIGHT - y, BADGE_EINK_WIDTH);
 	lib_png_destroy(pr);
 	if (is_bytes) {
 		lib_mem_destroy(reader_p);
@@ -534,6 +534,20 @@ STATIC mp_obj_t badge_eink_display_raw(mp_obj_t obj_img, mp_obj_t obj_flags)
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_2(badge_eink_display_raw_obj, badge_eink_display_raw);
 
+#else
+//These are empty replacements for the wait functions
+
+ STATIC mp_obj_t badge_eink_busy_() {
+   return mp_obj_new_bool(false);
+ }
+ STATIC MP_DEFINE_CONST_FUN_OBJ_0(badge_eink_busy_obj, badge_eink_busy_);
+
+ STATIC mp_obj_t badge_eink_busy_wait_() {
+  //Nothing here.
+   return mp_const_none;
+ }
+ STATIC MP_DEFINE_CONST_FUN_OBJ_0(badge_eink_busy_wait_obj, badge_eink_busy_wait_);
+
 #endif
 
 #if defined(I2C_ERC12864_ADDR)
@@ -550,7 +564,7 @@ STATIC mp_obj_t badge_lcd_display_raw(mp_obj_t obj_img)
 	mp_uint_t len;
 	uint8_t *buffer = (uint8_t *)mp_obj_str_get_data(obj_img, &len);
 
-	if (len != BADGE_ERC12864_DATA_LENGTH) {
+	if (len != BADGE_ERC12864_1BPP_DATA_LENGTH) {
 		mp_raise_msg(&mp_type_AttributeError, "First argument has wrong length");
 	}
 
@@ -839,12 +853,12 @@ STATIC mp_obj_t badge_mount_bpp() {
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_0(badge_mount_bpp_obj, badge_mount_bpp);
 
-STATIC mp_obj_t badge_read_input(mp_obj_t timeout_obj) {
+/*STATIC mp_obj_t badge_read_input(mp_obj_t timeout_obj) {
 	int timeout = mp_obj_get_int(timeout_obj);
 	return mp_obj_new_int(badge_input_get_event(timeout));
 }
 
-STATIC MP_DEFINE_CONST_FUN_OBJ_1(badge_read_input_obj, badge_read_input);
+STATIC MP_DEFINE_CONST_FUN_OBJ_1(badge_read_input_obj, badge_read_input);*/
 
 // Module globals
 
@@ -867,12 +881,12 @@ STATIC const mp_rom_map_elem_t badge_module_globals_table[] = {
     {MP_ROM_QSTR(MP_QSTR_eink_init), MP_ROM_PTR(&badge_eink_init_obj)},
     {MP_ROM_QSTR(MP_QSTR_eink_deep_sleep), MP_ROM_PTR(&badge_eink_deep_sleep_obj)},
     {MP_ROM_QSTR(MP_QSTR_eink_wakeup), MP_ROM_PTR(&badge_eink_wakeup_obj)},
-    {MP_ROM_QSTR(MP_QSTR_eink_busy), MP_ROM_PTR(&badge_eink_busy_obj)},
-    {MP_ROM_QSTR(MP_QSTR_eink_busy_wait), MP_ROM_PTR(&badge_eink_busy_wait_obj)},
     {MP_ROM_QSTR(MP_QSTR_eink_png), MP_ROM_PTR(&badge_eink_png_obj)},
     {MP_ROM_QSTR(MP_QSTR_eink_png_info), MP_ROM_PTR(&badge_eink_png_info_obj)},
     {MP_ROM_QSTR(MP_QSTR_eink_display_raw), MP_ROM_PTR(&badge_eink_display_raw_obj)},
 #endif
+    {MP_ROM_QSTR(MP_QSTR_eink_busy), MP_ROM_PTR(&badge_eink_busy_obj)},
+    {MP_ROM_QSTR(MP_QSTR_eink_busy_wait), MP_ROM_PTR(&badge_eink_busy_wait_obj)},
 
 #ifdef I2C_ERC12864_ADDR
     {MP_ROM_QSTR(MP_QSTR_lcd_display_raw), MP_ROM_PTR(&badge_lcd_display_raw_obj)},
@@ -935,7 +949,7 @@ STATIC const mp_rom_map_elem_t badge_module_globals_table[] = {
 
     {MP_OBJ_NEW_QSTR(MP_QSTR_safe_mode), (mp_obj_t)&badge_safe_mode_obj},
 
-    {MP_OBJ_NEW_QSTR(MP_QSTR_read_input), (mp_obj_t)&badge_read_input_obj},
+    //{MP_OBJ_NEW_QSTR(MP_QSTR_read_input), (mp_obj_t)&badge_read_input_obj},
 
 };
 
