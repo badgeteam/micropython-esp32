@@ -27,4 +27,4 @@ def asked_nickname(value):
 ugfx.init()
 nickname = badge.nvs_get_str("owner", "name", "")
 
-#dialogs.prompt_text("Nickname", nickname, cb=asked_nickname)
+dialogs.prompt_text("Nickname", nickname, cb=asked_nickname)

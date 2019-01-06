@@ -1,21 +1,21 @@
-### Author: EMF Badge team
-### Author: SHA2017Badge team
-### Description: Some basic UGFX powered dialogs
-### License: MIT
+# Author: EMF Badge team
+# Author: SHA2017Badge team
+# Description: Some basic UGFX powered dialogs
+# License: MIT
 
-import machine, ugfx, utime as time
+import machine, ugfx, utime as time, version
 
 wait_for_interrupt = True
 button_pushed = ''
 
-def notice(text, title="SHA2017", close_text="Close", width = 296, height = 128, font="Roboto_Regular12"):
+def notice(text, title=version.dialog_title, close_text="Close", width = ugfx.width(), height = ugfx.height(), font="Roboto_Regular12"):
 	"""Show a notice which can be closed with button A.
 
 	The caller is responsible for flushing the display after the user has confirmed the notice.
 	"""
 	prompt_boolean(text, title = title, true_text = close_text, false_text = None, width = width, height = height, font=font)
 
-def prompt_boolean(text, title="SHA2017", true_text="Yes", false_text="No", width = 296, height = 128, font="Roboto_Regular12", cb=None):
+def prompt_boolean(text, title=version.dialog_title, true_text="Yes", false_text="No", width = ugfx.width(), height = ugfx.height(),  font="Roboto_Regular12", cb=None):
 	"""A simple one and two-options dialog
 
 	if 'false_text' is set to None only one button is displayed.
@@ -74,8 +74,8 @@ def prompt_boolean(text, title="SHA2017", true_text="Yes", false_text="No", widt
 	ugfx.set_lut(ugfx.LUT_NORMAL)
 	ugfx.flush()
 
-	if button_no: ugfx.input_attach(ugfx.BTN_B, asyncCancel if cb else syncCancel)
-	ugfx.input_attach(ugfx.BTN_A, asyncSuccess if cb else syncSuccess)
+	if button_no: ugfx.input_attach(version.btn_cancel, asyncCancel if cb else syncCancel)
+	ugfx.input_attach(version.btn_ok, asyncSuccess if cb else syncSuccess)
 
 	if cb:
 		return
@@ -87,7 +87,7 @@ def prompt_boolean(text, title="SHA2017", true_text="Yes", false_text="No", widt
 		if button_pushed == "B": return done(False)
 		return done(True)
 
-def prompt_text(description, init_text = "", true_text="OK", false_text="Back", width = 300, height = 200, font="Roboto_BlackItalic24", cb=None):
+def prompt_text(description, init_text = "", true_text="OK", false_text="Back", width = ugfx.width(), height = ugfx.height(), font="Roboto_BlackItalic24", cb=None):
 	"""Shows a dialog and keyboard that allows the user to input/change a string
 
 	Calls the 'cb' callback or return None if user aborts with button B. Using a callback is highly recommended as it's not
@@ -152,20 +152,20 @@ def prompt_text(description, init_text = "", true_text="OK", false_text="Back", 
 			if focus == 0:
 				edit.set_focus()
 				kb.enabled(1)
-				ugfx.input_attach(ugfx.BTN_B, lambda pressed: vkey_backspace() if pressed else 0)
-				ugfx.input_attach(ugfx.BTN_A, lambda pressed: 0 if pressed else ugfx.flush())
+				ugfx.input_attach(version.btn_cancel, lambda pressed: vkey_backspace() if pressed else 0)
+				ugfx.input_attach(version.btn_ok, lambda pressed: 0 if pressed else ugfx.flush())
 				focus = 1
 			elif focus == 1 or not button_no:
 				button_yes.set_focus()
 				kb.enabled(0)
-				ugfx.input_attach(ugfx.BTN_A, asyncSuccess if cb else syncSuccess)
-				ugfx.input_attach(ugfx.BTN_B, asyncCancel if cb else syncCancel)
+				ugfx.input_attach(version.btn_ok, asyncSuccess if cb else syncSuccess)
+				ugfx.input_attach(version.btn_cancel, asyncCancel if cb else syncCancel)
 				focus = (2 if button_no else 0)
 			else:
 				button_no.set_focus()
 				kb.enabled(0)
-				ugfx.input_attach(ugfx.BTN_A, asyncCancel if cb else syncCancel)
-				ugfx.input_attach(ugfx.BTN_B, asyncCancel if cb else syncCancel)
+				ugfx.input_attach(version.btn_ok, asyncCancel if cb else syncCancel)
+				ugfx.input_attach(version.btn_cancel, asyncCancel if cb else syncCancel)
 				focus = 0
 			ugfx.flush()
 
@@ -262,13 +262,13 @@ def pressed_start(pushed):
 	wait_for_interrupt = False
 	button_pushed = 'START'
 
-ugfx.input_attach(ugfx.BTN_A, pressed_a)
-ugfx.input_attach(ugfx.BTN_B, pressed_b)
+ugfx.input_attach(version.btn_ok, pressed_a)
+ugfx.input_attach(version.btn_cancel, pressed_b)
 ugfx.input_attach(ugfx.BTN_START, pressed_start)
 
 class WaitingMessage:
 	"""Shows a dialog with a certain message that can not be dismissed by the user"""
-	def __init__(self, text = "Please Wait...", title="SHA2017Badge"):
+	def __init__(self, text = "Please Wait...", title=version.dialog_title):
 		self.window = ugfx.Container(30, 30, ugfx.width() - 60, ugfx.height() - 60)
 		self.window.show()
 		self.window.text(5, 10, title, ugfx.BLACK)
