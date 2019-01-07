@@ -701,7 +701,7 @@ BADGE_COMPONENTS_O = $(addprefix $(PROJECT_PATH)/components/,\
 	ugfx-glue/ginput_lld_toggle.o \
 	ugfx-glue/gfx_mk.o \
 	ugfx-glue/gfx_userfs.o \
-	sha2017/wildcard_sha2017_org.o \
+	sha2017/letsencrypt.o \
 	sha2017/sha2017_ota_graphics.o \
 	sha2017/sha2017_ota.o \
 	badge-first-run/badge_first_run.o \
