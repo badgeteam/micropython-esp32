@@ -51,7 +51,7 @@
 #include "mbedtls/debug.h"
 #include "mbedtls/error.h"
 
-#include "wildcard_sha2017_org.h"
+#include "letsencrypt.h"
 
 #define TAG "modussl_mbedtls.c"
 
@@ -160,7 +160,7 @@ STATIC mp_obj_ssl_socket_t *socket_new(mp_obj_t sock, struct ssl_args *args) {
     }
 
     if (sha2017_subdomain) {
-        ret = mbedtls_x509_crt_parse_der(&o->cacert, wildcard_sha2017_org, 856);
+        ret = mbedtls_x509_crt_parse_der(&o->cacert, letsencrypt, 856);
         if(ret < 0) {
             char errstr[256];
             mbedtls_strerror(ret, errstr, sizeof(errstr));
