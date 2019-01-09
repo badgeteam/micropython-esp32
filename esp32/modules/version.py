@@ -1,7 +1,7 @@
 import ugfx
 
 build                  = 18
-name                   = "Work in progress"
+name                   = "Zzz...."
 badge_name             = "Disobey"
 dialog_title           = "Disobey"
 default_orientation    = 0

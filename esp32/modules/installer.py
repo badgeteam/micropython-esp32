@@ -1,4 +1,4 @@
-import ugfx, badge, network, gc, time, urequests, appglue, sys, appglue, easydraw, version
+import ugfx, badge, network, gc, time, urequests, appglue, sys, easydraw, version
 
 def connectWiFi():
     nw = network.WLAN(network.STA_IF)
@@ -8,14 +8,14 @@ def connectWiFi():
         password = badge.nvs_get_str('badge', 'wifi.password', version.wifi_password)
         nw.connect(ssid, password) if password else nw.connect(ssid)
 
-        appglue.msg("Connecting to '"+ssid+"'...")
+        easydraw.msg("Connecting to '"+ssid+"'...")
 
         timeout = 150
         while not nw.isconnected():
             time.sleep(0.1)
             timeout = timeout - 1
             if (timeout<1):
-                appglue.msg("Timeout while connecting!")
+                easydraw.msg("Timeout while connecting!")
                 nw.active(True)
                 return False
     return True
@@ -69,9 +69,8 @@ def list_apps(slug):
 
 	ugfx.input_attach(ugfx.JOY_UP, show_description)
 	ugfx.input_attach(ugfx.JOY_DOWN, show_description)
-	ugfx.input_attach(ugfx.BTN_A, install_app)
+	ugfx.input_attach(ugfx.BTN_START, install_app)
 	ugfx.input_attach(ugfx.BTN_B, lambda pushed: list_categories() if pushed else False)
-	ugfx.input_attach(ugfx.BTN_START, lambda pushed: appglue.start_app('') if pushed else False)
 
 	show_description(True)
 	gc.collect()
@@ -95,7 +94,6 @@ def install_app(active):
 
 		ugfx.input_attach(ugfx.JOY_UP, 0)
 		ugfx.input_attach(ugfx.JOY_DOWN, 0)
-		ugfx.input_attach(ugfx.BTN_A, 0)
 		ugfx.input_attach(ugfx.BTN_B, 0)
 		ugfx.input_attach(ugfx.BTN_START, 0)
 
@@ -135,16 +133,16 @@ def list_categories():
 		categories
 	except:
 		ugfx.input_init()
-		appglue.msg('Getting categories')
+		easydraw.msg('Getting categories')
 		try:
 			f = urequests.get("https://badge.disobey.fi/eggs/categories/json", timeout=30)
 			categories = f.json()
 		except:
-			appglue.msg('Failed :(')
+			easydraw.msg('Failed :(')
 			appglue.start_app('launcher', False)
 
 			f.close()
-		appglue.msg('Done!')
+		easydraw.msg('Done!')
 		options = ugfx.List(0,0,int(ugfx.width()),ugfx.height())
 
 
@@ -167,7 +165,7 @@ def list_categories():
 
 
 if not connectWiFi():
-	appglue.msg('WiFi failed :(')
+	easydraw.msg('WiFi failed :(')
 	appglue.start_app('launcher', False)
 else:
 	list_categories()
