@@ -24,11 +24,10 @@ def populate_apps():
         userApps = os.listdir('lib')
     except OSError:
         userApps = []
-	add_app("",{"name":"< Home", "category":"system"})
     for app in userApps:
         add_app(app,read_metadata(app))
     add_app("installer",{"name":"Installer", "category":"system"})
-    #add_app("setup",{"name":"Set nickname", "category":"system"})
+    add_app("setup",{"name":"Set nickname", "category":"system"})
     add_app("update",{"name":"Update apps", "category":"system"})
     add_app("ota_update",{"name":"Update firmware", "category":"system"})
   
@@ -49,7 +48,7 @@ def populate_category(category="",system=True):
             
 def populate_options():
     global options
-    options = ugfx.List(0,0,int(ugfx.width()),ugfx.height())
+    options = ugfx.List(0,0,int(ugfx.width()/2),ugfx.height())
     global currentListTitles
     for title in currentListTitles:
         options.add_item(title)
@@ -89,7 +88,7 @@ def uninstall():
     def perform_uninstall(ok):
         global install_path
         if ok:
-            easydraw.msg("Removing "+currentListTitles[selected]+"...", "Removing...",True)
+            easydraw.msg("Removing "+currentListTitles[selected]+"...", "Still Uninstalling Anyway...",True)
             install_path = get_install_path()
             for rm_file in os.listdir("%s/%s" % (install_path, currentListTargets[selected]["file"])):
                 easydraw.msg("Deleting '"+rm_file+"'...")
@@ -99,7 +98,7 @@ def uninstall():
             easydraw.msg("Uninstall completed!")
         start()
 
-    uninstall = dialogs.prompt_boolean('Remove %s?' % currentListTitles[selected], cb=perform_uninstall)
+    uninstall = dialogs.prompt_boolean('Are you sure you want to remove %s?' % currentListTitles[selected], cb=perform_uninstall)
 
 # Run app
         
@@ -128,12 +127,17 @@ def get_install_path():
 
 
 # Actions        
-def input_run(pressed):
+def input_a(pressed):
     pm.feed()
     if pressed:
         run()
+    
+def input_b(pressed):
+    pm.feed()
+    if pressed:
+        appglue.home()
 
-def input_uninstall(pressed):
+def input_select(pressed):
     pm.feed()
     if pressed:
         uninstall()
@@ -155,30 +159,71 @@ def init_power_management():
 
 # Main application
 def start():
+    print("Launcher start standalone")
     ugfx.input_init()
     ugfx.set_lut(ugfx.LUT_FASTER)
     ugfx.clear(ugfx.WHITE)
-    
-    badge.backlight(255)
+
+    if badge.safe_mode():
+	still = "SAFE"
+	anyway = "Mode"
+    else:
+	still = "STILL"
+	anyway = "Anyway"
+
+    ugfx.string_box(148,0,148,26, still, "Roboto_BlackItalic24", ugfx.BLACK, ugfx.justifyCenter)
+    ugfx.string_box(148,23,148,23, "Hacking", "PermanentMarker22", ugfx.BLACK, ugfx.justifyCenter)
+    ugfx.string_box(148,48,148,26, anyway, "Roboto_BlackItalic24", ugfx.BLACK, ugfx.justifyCenter)
+
+    #the line under the text
+    str_len = ugfx.get_string_width("Hacking","PermanentMarker22")
+    line_begin = 148 + int((148-str_len)/2)
+    line_end = str_len+line_begin
+    ugfx.line(line_begin, 46, line_end, 46, ugfx.BLACK)
+
+    #the cursor past the text
+    cursor_pos = line_end+5
+    ugfx.line(cursor_pos, 22, cursor_pos, 44, ugfx.BLACK)
+
+    # Instructions
+    ugfx.line(148, 78, 296, 78, ugfx.BLACK)
+    ugfx.string_box(148,78,148,18, " A: Run", "Roboto_Regular12", ugfx.BLACK, ugfx.justifyLeft)
+    ugfx.string_box(148,78,148,18, " B: Return to home", "Roboto_Regular12", ugfx.BLACK, ugfx.justifyRight)
+    ugfx.string_box(148,92,148,18, " SELECT: Uninstall", "Roboto_Regular12", ugfx.BLACK, ugfx.justifyLeft)
+    ugfx.line(148, 110, 296, 110, ugfx.BLACK)
+    ugfx.string_box(148,110,148,18, " " + version.name, "Roboto_Regular12", ugfx.BLACK, ugfx.justifyLeft)
 
     global options
     global install_path
     options = None
     install_path = None
 
-    ugfx.input_attach(ugfx.BTN_START, input_run)
-    ugfx.input_attach(ugfx.BTN_B, input_uninstall)
+    ugfx.input_attach(ugfx.BTN_A, input_a)
+    ugfx.input_attach(ugfx.BTN_B, input_b)
+    ugfx.input_attach(ugfx.BTN_SELECT, input_select)
     ugfx.input_attach(ugfx.JOY_UP, input_other)
     ugfx.input_attach(ugfx.JOY_DOWN, input_other)
     ugfx.input_attach(ugfx.JOY_LEFT, input_other)
     ugfx.input_attach(ugfx.JOY_RIGHT, input_other)
+    ugfx.input_attach(ugfx.BTN_START, input_other)
 
     populate_apps()
     populate_category()
     populate_options()
+    
 
     # do a greyscale flush on start
     ugfx.flush(ugfx.GREYSCALE)
+    
+def start_splash():
+    print("Launcher start splash")
+    global options
+    global install_path
+    options = None
+    install_path = None
+    populate_apps()
+    populate_category()
+    populate_options()
 
 start()
 init_power_management()

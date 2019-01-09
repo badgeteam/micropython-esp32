@@ -1,5 +1,5 @@
 # This file is executed on every boot (including wake-boot from deepsleep)
-import badge, machine, esp, ugfx, sys, time
+import badge, machine, esp, ugfx, sys, time, easydraw, appglue
 badge.init()
 ugfx.init()
 
@@ -27,19 +27,23 @@ else:
 
 try:
     if not splash=="shell":
-        if splash.startswith('bpp '):
-            splash = splash[4:len(splash)]
-            badge.mount_bpp()
-        elif splash.startswith('sdcard '):
-            splash = splash[7:len(splash)]
-            badge.mount_sdcard()
-        __import__(splash)
+        import post_ota
+        #if (badge.nvs_get_u8('badge', 'setup.state', 0) < 3):
+        if False:
+            import firstboot
+        else:
+            if splash.startswith('bpp '):
+                splash = splash[4:len(splash)]
+                badge.mount_bpp()
+            elif splash.startswith('sdcard '):
+                splash = splash[7:len(splash)]
+                badge.mount_sdcard()
+            __import__(splash)
     else:
         ugfx.clear(ugfx.WHITE)
         ugfx.flush(ugfx.LUT_FULL)
 except BaseException as e:
     sys.print_exception(e)
-    import easydraw
     easydraw.msg("A fatal error occured!","Still Crashing Anyway", True)
     easydraw.msg("")
 
@@ -54,7 +58,5 @@ except BaseException as e:
     easydraw.msg(str(e))
     easydraw.msg("")
     easydraw.msg("Rebooting in 5 seconds...")
-    import time
     time.sleep(5)
-    import appglue
     appglue.home()

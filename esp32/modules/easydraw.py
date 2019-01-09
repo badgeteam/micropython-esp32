@@ -1,39 +1,37 @@
-# File: easydraw.py
-# Description: Wrapper that makes drawing things simple
-# License: MIT
-# Authors: Renze Nicolai <renze@rnplus.nl>
+import ugfx, badge, version
 
-import badge
-import version
-import lcd
-
+# Functions
 def msg(message, title = 'Loading...', reset = False):
-	lcd.fb.fill(0)
-	lcd.fb.text(title, 0, 0, 1)
-	lcd.fb.text(message, 0, 10, 1)
-	lcd.write()
+    """Show a terminal style loading screen with title
 
-def nickname(y = 25, font = 0, color = 0, split = version.nick_width_large, height = version.nick_height_large):
-	nick = badge.nvs_get_str("owner", "name", 'Henk de Vries')
-	lcd.fb.text(nick, 0, 54, 1)
+    title can be optionaly set when resetting or first call
+    """
+    global messageHistory
+
+    try:
+        messageHistory
+        if reset:
+            raise exception
+    except:
+        ugfx.clear(ugfx.WHITE)
+        ugfx.string(0, 0, title, version.font_header, ugfx.BLACK)
+        messageHistory = []
+
+    if len(messageHistory)<3:
+        ugfx.string(0, 15 + (len(messageHistory) * 15), message, version.font_default, ugfx.BLACK)
+        messageHistory.append(message)
+    else:
+        messageHistory.pop(0)
+        messageHistory.append(message)
+        ugfx.area(0, 15, 128, 49, ugfx.WHITE)
+        for i, message in enumerate(messageHistory):
+            ugfx.string(0, 15 + (i * 15), message, version.font_default, ugfx.BLACK)
+
+    ugfx.flush(ugfx.LUT_FASTER)
+
+def nickname(y = 0, font = version.font_nickname_small, color = ugfx.BLACK):
+    nick = badge.nvs_get_str("owner", "name", 'John Doe')
+    ugfx.string_box(0,y,296,38, nick, font, color, ugfx.justifyCenter)
 
 def battery(on_usb, vBatt, charging):
-	pass
-
-def lineSplit(message, width):
-	words = message.split(" ")
-	lines = []
-	line = ""
-	for word in words:
-		if len(word) > width:
-			lines.append(line)
-			lines.append(word)
-			line = ""
-		elif len(line)+len(word) < width:
-			line += " "+word
-		else:
-			lines.append(line)
-			line = word
-	if len(line) > 0:
-		lines.append(line)
-	return lines
+    pass
