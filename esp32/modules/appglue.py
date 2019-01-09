@@ -1,4 +1,4 @@
-import ugfx, esp, badge, deepsleep, appglue
+import ugfx, esp, badge, deepsleep, easydraw
 
 def start_app(app, display = True):
     if display:
