@@ -18,27 +18,16 @@ def draw(mode, goingToSleep=False):
 	else:
 		# We prepare the screen refresh
 		ugfx.clear(ugfx.WHITE)
-		if goingToSleep:
-			info1 = 'Sleeping...'
-			info2 = ''
-		else:
-			info1 = 'Welcome!'
-			if otac.available(False):
-				info2 = 'OTA update available!'
-			else:
-				info2 = ''
-
-		def disp_string_right(y, s):
-			l = ugfx.get_string_width(s,"Roboto_Regular12")
-			ugfx.string(ugfx.height()-l, y, s, "Roboto_Regular12",ugfx.BLACK)
-
-		disp_string_right(0, info1)
-		disp_string_right(12, info2)
-
-		if badge.safe_mode():
-			disp_string_right(24, "Safe mode")
-
 		easydraw.nickname()
+		if goingToSleep:
+			info = 'Sleeping...'
+		elif badge.safe_mode():
+			info = "Safe mode!"
+		elif otac.available(False):
+			info = 'OTA update available!'
+		else:
+			info = 'Welcome!'
+		easydraw.disp_string_right_bottom(0, info)
 
 # Button input
 
@@ -69,6 +58,8 @@ def onSleep(idleTime):
 	draw(True, True)
 
 ### PROGRAM
+
+badge.backlight(255)
 
 splash_input_init()
 
@@ -111,7 +102,7 @@ virtualtimers.activate(25)
 pm.callback(onSleep)
 pm.feed()
 
-badge.backlight(255)
 
-umenu = term_menu.UartMenu(onSleep, badge.safe_mode())
+
+umenu = term_menu.UartMenu(onSleep, pm, badge.safe_mode())
 umenu.main()

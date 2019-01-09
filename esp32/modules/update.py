@@ -4,7 +4,7 @@ def stop():
     time.sleep(2)
     appglue.start_app("launcher")
 
-easydraw.msg("Welcome!","Still updating anyway...",True)
+easydraw.msg("Welcome!","Updating...",True)
 
 
 if not easywifi.status():

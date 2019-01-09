@@ -4,7 +4,7 @@
 # License: MIT
 # Authors: Renze Nicolai <renze@rnplus.nl>
 
-import time, network, badge, easydraw
+import time, network, badge, easydraw, version
 
 state = False
 failed = False
@@ -31,8 +31,8 @@ def enable(showStatus=True):
         nw = network.WLAN(network.STA_IF)
         if not nw.isconnected():
             nw.active(True)
-            ssid = badge.nvs_get_str('badge', 'wifi.ssid', 'SHA2017-insecure')
-            password = badge.nvs_get_str('badge', 'wifi.password')
+            ssid = badge.nvs_get_str('badge', 'wifi.ssid', version.wifi_ssid)
+            password = badge.nvs_get_str('badge', 'wifi.password', version.wifi_password)
             if showStatus:
                 easydraw.msg("Connecting to '"+ssid+"'...")
             nw.connect(ssid, password) if password else nw.connect(ssid)

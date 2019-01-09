@@ -1,4 +1,4 @@
-import ugfx, appglue, term, sys,time
+import ugfx, appglue, term, sys,time, version
 
 names = ["Niek Blankers", "Sebastian Oort", "Bas van Sisseren", "Jeroen Domburg", "Christel Sanders", "Markus Bechtold", "Thomas Roos", "Anne Jan Brouwer", "Renze Nicolai", "Aram Verstegen", "Arnout Engelen", "Alexandre Dulaunoy", " Eric Poulsen", "Damien P. George", "uGFX", "EMF Badge Team"]
 
@@ -7,7 +7,7 @@ def action_exit(pushed):
         appglue.home()
 
 def draw_name(x,y,name):
-    ugfx.string(x, y, name, "PermanentMarker22", ugfx.BLACK)
+    ugfx.string(x, y, name, version.font_default, ugfx.BLACK)
     ugfx.flush()
 
 def show_names():
@@ -24,7 +24,7 @@ def show_names():
 	
 	for n in range(0, len(names)):
 		draw_name(5,y,names[n])
-		y += 23
+		y += 15
 		nos += 1
 		if (nos > 3):
 			nos = 0

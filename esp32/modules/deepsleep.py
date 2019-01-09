@@ -1,13 +1,13 @@
-import machine, badge
+import machine, badge, time
 
 pin = machine.Pin(25)
 rtc = machine.RTC()
 rtc.wake_on_ext0(pin = pin, level = 0)
 
-def start_sleeping(time=0):
-    badge.eink_busy_wait()
-    machine.deepsleep(time)
+def start_sleeping(duration=0):
+	badge.backlight(0)
+	time.sleep(0.1)
+	machine.deepsleep(duration)
 
 def reboot():
-    badge.eink_busy_wait()
-    machine.deepsleep(1)
+	machine.deepsleep(1)

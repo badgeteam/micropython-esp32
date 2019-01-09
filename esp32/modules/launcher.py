@@ -24,13 +24,12 @@ def populate_apps():
         userApps = os.listdir('lib')
     except OSError:
         userApps = []
-	add_app("",{"name":"< Home", "category":"system"})
     for app in userApps:
         add_app(app,read_metadata(app))
     add_app("installer",{"name":"Installer", "category":"system"})
-    #add_app("setup",{"name":"Set nickname", "category":"system"})
     add_app("update",{"name":"Update apps", "category":"system"})
     add_app("ota_update",{"name":"Update firmware", "category":"system"})
+    add_app(badge.nvs_get_str('boot','splash','splash'),{"name":"Home", "category":"system"})
   
 # List as shown on screen
 currentListTitles = []

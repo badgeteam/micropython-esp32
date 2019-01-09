@@ -1,14 +1,8 @@
-import ugfx, esp, badge, deepsleep
+import ugfx, esp, badge, deepsleep, appglue
 
 def start_app(app, display = True):
     if display:
-        ugfx.clear(ugfx.WHITE)
-        ugfx.string(0, 0, "Loading...", "PermanentMarker22", ugfx.BLACK)
-        if app:
-            ugfx.string(0,  25, "Starting "+app+"...","Roboto_Regular12",ugfx.BLACK)
-        else:
-            ugfx.string(0,  25, "Returning to homescreen...","Roboto_Regular12",ugfx.BLACK)
-        ugfx.flush(ugfx.LUT_FASTER)
+        easydraw.msg(app, "Loading...", True)
     esp.rtcmem_write_string(app)
     deepsleep.reboot()
 
@@ -20,8 +14,8 @@ def start_ota():
     esp.rtcmem_write(1,254)
     deepsleep.reboot()
 
-def start_bpp(duration):
-    print("[BPP] Duration = "+str(duration))
-    esp.rtcmem_write(0,2)
-    esp.rtcmem_write(1,253)
-    deepsleep.reboot()
+#def start_bpp(duration):
+#    print("[BPP] Duration = "+str(duration))
+#    esp.rtcmem_write(0,2)
+#    esp.rtcmem_write(1,253)
+#    deepsleep.reboot()

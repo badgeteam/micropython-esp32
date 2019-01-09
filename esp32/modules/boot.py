@@ -40,7 +40,7 @@ try:
 except BaseException as e:
     sys.print_exception(e)
     import easydraw
-    easydraw.msg("A fatal error occured!","Still Crashing Anyway", True)
+    easydraw.msg("A fatal error occured!","Fatal exception", True)
     easydraw.msg("")
 
     # if we started the splash screen and it is not the default splash screen,
@@ -49,11 +49,7 @@ except BaseException as e:
         easydraw.msg("Disabling custom splash screen.")
         easydraw.msg("")
         badge.nvs_erase_key('boot', 'splash')
-
-    easydraw.msg("Guru meditation:")
     easydraw.msg(str(e))
-    easydraw.msg("")
-    easydraw.msg("Rebooting in 5 seconds...")
     import time
     time.sleep(5)
     import appglue
