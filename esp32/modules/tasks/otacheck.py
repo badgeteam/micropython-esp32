@@ -11,7 +11,7 @@ def download_info():
     easydraw.msg("Checking for updates...")
     result = False
     try:
-        data = requests.get("https://badge.sha2017.org/version")
+        data = requests.get("https://badge.disobey.fi/firmware/version")
     except:
         easydraw.msg("Error: could not download JSON!")
         time.sleep(5)
@@ -35,7 +35,7 @@ def available(update=False):
         info = download_info()
         if info:
             import version
-            if info["build"] > version.build:
+            if info["build"] > version.vbuild:
                 badge.nvs_set_u8('badge','OTA.ready',1)
                 return True
 

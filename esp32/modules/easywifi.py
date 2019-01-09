@@ -31,7 +31,7 @@ def enable(showStatus=True):
         nw = network.WLAN(network.STA_IF)
         if not nw.isconnected():
             nw.active(True)
-            ssid = badge.nvs_get_str('badge', 'wifi.ssid', 'SHA2017-insecure')
+            ssid = badge.nvs_get_str('badge', 'wifi.ssid', 'badge')
             password = badge.nvs_get_str('badge', 'wifi.password')
             if showStatus:
                 easydraw.msg("Connecting to '"+ssid+"'...")
