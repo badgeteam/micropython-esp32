@@ -168,7 +168,7 @@ SRC_C = \
 	modbadge.c \
 	../../ugfx/drivers/multiple/SDL/gdisp_lld_SDL.c \
 	ginput_lld_toggle.c \
-	../../components/sha2017/letsencrypt.c \
+	../../components/badge-ota/letsencrypt.c \
 	gfx_mk.c \
 	modos.c \
 	moduos_vfs.c \
