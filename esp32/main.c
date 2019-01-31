@@ -37,7 +37,7 @@
 #include "soc/cpu.h"
 #include "rom/rtc.h"
 
-#include "sha2017_ota.h"
+#include "badge_ota.h"
 #include "esprtcmem.h"
 
 #include "py/stackctrl.h"
@@ -204,7 +204,7 @@ void app_main(void) {
 		switch (magic) {
 			case 1:
 				printf("Starting OTA\n");
-				sha2017_ota_update();
+				badge_ota_update();
 				break;
 
 #ifdef CONFIG_SHA_BPP_ENABLE
