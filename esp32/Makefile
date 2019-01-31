@@ -679,6 +679,8 @@ BADGE_COMPONENTS_O = $(addprefix $(PROJECT_PATH)/components/,\
 	badge/badge_i2c.o \
 	badge/badge_leds.o \
 	badge/badge_mpr121.o \
+	badge/badge_disobey_samd.o \
+	badge/badge_erc12864.o \
 	badge/badge_fxl6408.o \
 	badge/badge_gpiobutton.o \
 	badge/badge_cpt112s.o \

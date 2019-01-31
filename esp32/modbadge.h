@@ -7,6 +7,7 @@
 #include "badge_pins.h"
 #include "badge_fb.h"
 #include "badge_eink.h"
+#include "badge_fb.h"
 #include "badge_eink_dev.h"
 #include "badge_power.h"
 #include "badge_leds.h"
