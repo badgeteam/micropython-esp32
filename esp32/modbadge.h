@@ -5,8 +5,8 @@
 
 #include "badge.h"
 #include "badge_pins.h"
+#include "badge_fb.h"
 #include "badge_eink.h"
-#include "badge_eink_fb.h"
 #include "badge_eink_dev.h"
 #include "badge_power.h"
 #include "badge_leds.h"
@@ -29,4 +29,4 @@
 // #include "madison_gurkha.h"
 // #include "leaseweb.h"
 
-#include "sha2017_ota.h"
+#include "badge_ota.h"
