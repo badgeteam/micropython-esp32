@@ -20,13 +20,46 @@ MICROPY_NATIVEFS = 1
 MICROPY_PY_BTREE = 1
 
 #FROZEN_DIR = scripts
-FROZEN_MPY_DIR = modules
+
+ifdef CONFIG_SHA_BADGE_V1
+FROZEN_MPY_DIR = modules_sha2017
+endif
+
+ifdef CONFIG_SHA_BADGE_V2
+FROZEN_MPY_DIR = modules_sha2017
+endif
+
+ifdef CONFIG_SHA_BADGE_V3
+FROZEN_MPY_DIR = modules_sha2017
+endif
+
+ifdef CONFIG_SHA_BADGE_V3_LITE
+FROZEN_MPY_DIR = modules_sha2017
+endif
+
+ifdef PROJECT_PATH
+FROZEN_MPY_DIR = modules_disobey2019
+endif
+
+ifdef CONFIG_HACKERHOTEL_BADGE_V1
+FROZEN_MPY_DIR = modules_hackerhotel2019
+endif
+
+ifdef CONFIG_HACKERHOTEL_BADGE_V0
+FROZEN_MPY_DIR = modules_hackerhotel2019
+endif
+
+ifdef CONFIG_SHA_BADGE_NONE
+FROZEN_MPY_DIR = modules_generic
+endif
 
 # include py core make definitions
 include ../py/py.mk
 
 PORT ?= /dev/ttyUSB0
 BAUD ?= 921600
+DISOBEY_PORT ?= /dev/ttyACM0
+DISOBEY_BAUD ?= 115200
 FLASH_MODE ?= dio
 FLASH_FREQ ?= 80m
 FLASH_SIZE ?= 16MB
@@ -165,17 +198,6 @@ SRC_C = \
 	ugfx_widgets.c \
 	ugfx_styles.c \
 	$(SRC_MOD)
-
-### TODO fix hardcoded images when we can't get image loader to work
-#BADGE_MAIN_SRC_C = $(addprefix ../../main/,\
-#	imgv2_menu.c \
-#	imgv2_nick.c \
-#	imgv2_sha.c \
-#	imgv2_test.c \
-#	imgv2_weather.c \
-#	madison_gurkha.c \
-#	leaseweb.c \
-#	)
 
 EXTMOD_SRC_C = $(addprefix extmod/,\
 	modonewire.c \
@@ -747,6 +769,19 @@ flash: $(BUILD)/firmware.bin
 erase:
 	$(ECHO) "Erasing flash"
 	$(Q)$(ESPTOOL) --chip esp32 --port $(PORT) --baud $(BAUD) erase_flash
+
+deploy_disobey: $(BUILD)/firmware.bin
+	$(ECHO) "Writing $^ to the board"
+	$(Q)$(ESPTOOL) --before no_reset --after no_reset --chip esp32 --port $(DISOBEY_PORT) --baud $(DISOBEY_BAUD) write_flash -z --flash_mode $(FLASH_MODE) --flash_freq $(FLASH_FREQ) 0x1000 $^
+
+flash_disobey: $(BUILD)/firmware.bin
+	$(ECHO) "Writing $^ to the board"
+	$(Q)$(ESPTOOL) --before no_reset --after no_reset --port $(DISOBEY_PORT) --baud $(DISOBEY_BAUD) erase_region 0xd000 0x2000
+	$(Q)$(ESPTOOL) --before no_reset --after no_reset --port $(DISOBEY_PORT) --baud $(DISOBEY_BAUD) write_flash 0x10000 build/application.bin
+
+erase_disobey:
+	$(ECHO) "Erasing flash"
+	$(Q)$(ESPTOOL) --before no_reset --after no_reset --chip esp32 --port $(DISOBEY_PORT) --baud $(DISOBEY_BAUD) erase_flash
 
 ################################################################################
 # Declarations to build the application
