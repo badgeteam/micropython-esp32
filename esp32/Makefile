@@ -49,6 +49,7 @@ INC += -I../../components/badge
 INC += -I../../components/ugfx-glue
 INC += -I../../components/graph
 INC += -I../../components/sha2017
+INC += -I../../components/graphics
 INC += -I../../components/bpp-recv
 INC += -I../../components/bpp-if
 INC += -I../../components/ed25519/include
@@ -678,6 +679,8 @@ BADGE_COMPONENTS_O = $(addprefix $(PROJECT_PATH)/components/,\
 	badge/badge_i2c.o \
 	badge/badge_leds.o \
 	badge/badge_mpr121.o \
+	badge/badge_disobey_samd.o \
+	badge/badge_erc12864.o \
 	badge/badge_fxl6408.o \
 	badge/badge_gpiobutton.o \
 	badge/badge_cpt112s.o \
@@ -687,7 +690,7 @@ BADGE_COMPONENTS_O = $(addprefix $(PROJECT_PATH)/components/,\
 	badge/badge_power.o \
 	badge/badge_eink_dev.o \
 	badge/badge_eink_lut.o \
-	badge/badge_eink_fb.o \
+	badge/badge_fb.o \
 	badge/badge_nvs.o \
 	badge/badge.o \
 	graph/font.o \
@@ -698,7 +701,7 @@ BADGE_COMPONENTS_O = $(addprefix $(PROJECT_PATH)/components/,\
 	ugfx-glue/gfx_mk.o \
 	ugfx-glue/gfx_userfs.o \
 	sha2017/letsencrypt.o \
-	sha2017/sha2017_ota_graphics.o \
+	graphics/graphics.o \
 	sha2017/sha2017_ota.o \
 	badge-first-run/badge_first_run.o \
 	png/adler32.o \

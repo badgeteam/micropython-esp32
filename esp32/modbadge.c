@@ -40,10 +40,13 @@
 
 #include "badge_i2c.h"
 #include "badge_mpr121.h"
+#include "badge_disobey_samd.h"
+#include "badge_erc12864.h"
 
 #include "py/mperrno.h"
 #include "py/mphal.h"
 #include "py/runtime.h"
+#include "lib/utils/pyexec.h"
 
 #define TAG "esp32/modbadge"
 
@@ -54,6 +57,111 @@ STATIC mp_obj_t badge_init_() {
   return mp_const_none;
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_0(badge_init_obj, badge_init_);
+
+#ifndef CONFIG_SHA_BPP_ENABLE
+
+#define PARTITIONS_16MB_BIN_LEN 192
+#define PARTITIONS_LOCATION 0x8000
+#define PARTITIONS_SECTOR PARTITIONS_LOCATION/SPI_FLASH_SEC_SIZE
+
+// PARTITIONS UPDATE
+	STATIC mp_obj_t remove_bpp_partition(mp_obj_t _key) {
+	unsigned char partitions_16MB_bin[PARTITIONS_16MB_BIN_LEN] = {
+		0xaa, 0x50, 0x01, 0x02, 0x00, 0x90, 0x00, 0x00, 0x00, 0x40, 0x00, 0x00,
+		0x6e, 0x76, 0x73, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xaa, 0x50, 0x01, 0x00,
+		0x00, 0xd0, 0x00, 0x00, 0x00, 0x20, 0x00, 0x00, 0x6f, 0x74, 0x61, 0x64,
+		0x61, 0x74, 0x61, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+		0x00, 0x00, 0x00, 0x00, 0xaa, 0x50, 0x01, 0x01, 0x00, 0xf0, 0x00, 0x00,
+		0x00, 0x10, 0x00, 0x00, 0x70, 0x68, 0x79, 0x5f, 0x69, 0x6e, 0x69, 0x74,
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+		0xaa, 0x50, 0x00, 0x10, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x18, 0x00,
+		0x6f, 0x74, 0x61, 0x5f, 0x30, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xaa, 0x50, 0x00, 0x11,
+		0x00, 0x00, 0x19, 0x00, 0x00, 0x00, 0x18, 0x00, 0x6f, 0x74, 0x61, 0x5f,
+		0x31, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+		0x00, 0x00, 0x00, 0x00, 0xaa, 0x50, 0x01, 0x81, 0x00, 0x00, 0x31, 0x00,
+		0x00, 0x00, 0xcf, 0x00, 0x6c, 0x6f, 0x63, 0x66, 0x64, 0x00, 0x00, 0x00,
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	};
+
+	unsigned char check[PARTITIONS_16MB_BIN_LEN];
+	
+	esp_err_t err = spi_flash_read(PARTITIONS_LOCATION, check, PARTITIONS_16MB_BIN_LEN);
+	if (err != ESP_OK) {
+		ESP_LOGE(TAG, "Error while reading (1)! 0x%02x", err);
+		return mp_obj_new_bool(false);
+	}
+		
+	if (memcmp(check, partitions_16MB_bin, PARTITIONS_16MB_BIN_LEN)==0) {
+		ESP_LOGW(TAG, "PARTITIONS HAVE ALREADY BEEN UPDATED");
+		return mp_obj_new_bool(true);
+	}
+	
+	int key = mp_obj_get_int(_key);
+	if (key != 0x35C3) {
+		ESP_LOGE(TAG, "NOT UPDATING PARTITIONS BECAUSE OF INVALID KEY (0x%x)\nThis function is dangerous, do not run it if you do not know what you are doing!", key);
+		ESP_LOGE(TAG, "");
+		ESP_LOGE(TAG, " - Make sure you have inserted full batteries");
+		ESP_LOGE(TAG, " - Leave your badge connected to a computer while running this function");
+		ESP_LOGE(TAG, " - This function updates the partition table, it might result in a brick");
+		ESP_LOGE(TAG, "");
+		ESP_LOGE(TAG, "The key? What was the name of the CCC event between christmas 2019 and the start of 2019?");
+		ESP_LOGE(TAG, "Hint: 4 characters, as hex value. remove_bpp_partition(0x....)");
+		return mp_obj_new_bool(false);
+	}
+	ESP_LOGE(TAG, "WARNING: Updating partitions table! Do NOT power off!");
+	
+	err = spi_flash_erase_sector(PARTITIONS_SECTOR);
+	if (err != ESP_OK) {
+		ESP_LOGE(TAG, "Could not erase sector! 0x%02x", err);
+	} else {
+		err = spi_flash_write(PARTITIONS_LOCATION, partitions_16MB_bin, PARTITIONS_16MB_BIN_LEN);
+		if (err != ESP_OK) {
+			ESP_LOGE(TAG, "Error while writing! 0x%02x", err);
+		} else {
+			ESP_LOGW(TAG, "DONE WRITING PARTITION TABLE");
+		}
+	}
+	
+	err = spi_flash_read(PARTITIONS_LOCATION, check, PARTITIONS_16MB_BIN_LEN);
+	if (err != ESP_OK) {
+		ESP_LOGE(TAG, "Error while reading (2)! 0x%02x", err);
+		//return mp_obj_new_bool(false);
+	}
+	
+	if (memcmp(check, partitions_16MB_bin, PARTITIONS_16MB_BIN_LEN)==0) {
+		ESP_LOGW(TAG, "PARTITIONS HAVE BEEN UPDATE SUCCESFULLY, ENJOY THE EXTRA SPACE");
+		return mp_obj_new_bool(true);
+	}
+	
+	ESP_LOGE(TAG, "ERROR: Failure while updating partitions. You might have a brick now!");
+	ESP_LOGE(TAG, "Try flashing the partition table again or flash over serial using 'make deploy'.");
+	ESP_LOGE(TAG, "");
+	
+	for (uint16_t i = 0; i < PARTITIONS_16MB_BIN_LEN; i++) {
+		if (check[i]!=partitions_16MB_bin[i]) {
+			ESP_LOGE(TAG, "Expected %02X at %02X, read %02X", partitions_16MB_bin[i], i, check[i]);
+		}
+	}
+	
+	printf("Memory dump\n--------------");
+	uint8_t j = 0;
+	for (uint16_t i = 0; i < PARTITIONS_16MB_BIN_LEN; i++) {
+		if (j > 11) {
+			printf("\n");
+			j = 0;
+		}
+		printf("0x%02x, ", check[i]);
+		j++;
+	}
+	printf("\n");
+	
+	return mp_obj_new_bool(false);
+}
+STATIC MP_DEFINE_CONST_FUN_OBJ_1(remove_bpp_partition_obj, remove_bpp_partition);
+
+#endif
 
 /*** nvs access ***/
 
@@ -305,6 +413,11 @@ STATIC mp_obj_t badge_mpr121_get_touch_info_(void) {
 STATIC MP_DEFINE_CONST_FUN_OBJ_0(badge_mpr121_get_touch_info_obj, badge_mpr121_get_touch_info_);
 #endif // I2C_MPR121_ADDR
 
+STATIC mp_obj_t rawrepl(void) {
+	pyexec_raw_repl();
+	return mp_const_none;
+}
+STATIC MP_DEFINE_CONST_FUN_OBJ_0(rawrepl_obj, rawrepl);
 
 bool RTC_DATA_ATTR in_safe_mode = false;
 STATIC mp_obj_t badge_safe_mode() {
@@ -314,63 +427,56 @@ STATIC MP_DEFINE_CONST_FUN_OBJ_0(badge_safe_mode_obj, badge_safe_mode);
 // E-Ink (badge_eink.h)
 
 STATIC mp_obj_t badge_eink_init_() {
-  badge_eink_init(BADGE_EINK_DEFAULT);
-  return mp_const_none;
+#if defined(PIN_NUM_EPD_RESET)
+	badge_eink_init(BADGE_EINK_DEFAULT);
+#endif
+	return mp_const_none;
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_0(badge_eink_init_obj, badge_eink_init_);
 
 STATIC mp_obj_t badge_eink_deep_sleep_() {
-  badge_eink_deep_sleep();
-  return mp_const_none;
+#if defined(PIN_NUM_EPD_RESET)
+	badge_eink_deep_sleep();
+#endif
+	return mp_const_none;
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_0(badge_eink_deep_sleep_obj, badge_eink_deep_sleep_);
 
 STATIC mp_obj_t badge_eink_wakeup_() {
-  badge_eink_wakeup();
-  return mp_const_none;
+#if defined(PIN_NUM_EPD_RESET)
+	badge_eink_wakeup();
+#endif
+	return mp_const_none;
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_0(badge_eink_wakeup_obj, badge_eink_wakeup_);
 
-
-/**
-#define NUM_PICTURES 7
-const uint8_t *pictures[NUM_PICTURES] = {
-    imgv2_sha, imgv2_menu, imgv2_nick, imgv2_weather, imgv2_test, mg_logo, leaseweb
-};
-
-STATIC mp_obj_t badge_display_picture_(mp_obj_t picture_id,
-                                       mp_obj_t selected_lut) {
-  // TODO check for ranges
-  badge_eink_display(pictures[mp_obj_get_int(picture_id)],
-                     (mp_obj_get_int(selected_lut) + 1)
-                         << DISPLAY_FLAG_LUT_BIT);
-  return mp_const_none;
+STATIC mp_obj_t badge_eink_busy_() {
+#if defined(PIN_NUM_EPD_RESET)
+	return mp_obj_new_bool(badge_eink_dev_is_busy());
+#else
+	return mp_obj_new_bool(0);
+#endif
 }
-STATIC MP_DEFINE_CONST_FUN_OBJ_2(badge_display_picture_obj,
-                                 badge_display_picture_);
-*/
 
- STATIC mp_obj_t badge_eink_busy_() {
-   return mp_obj_new_bool(badge_eink_dev_is_busy());
- }
- STATIC MP_DEFINE_CONST_FUN_OBJ_0(badge_eink_busy_obj, badge_eink_busy_);
+STATIC MP_DEFINE_CONST_FUN_OBJ_0(badge_eink_busy_obj, badge_eink_busy_);
 
- STATIC mp_obj_t badge_eink_busy_wait_() {
-   badge_eink_dev_busy_wait();
-   return mp_const_none;
- }
- STATIC MP_DEFINE_CONST_FUN_OBJ_0(badge_eink_busy_wait_obj, badge_eink_busy_wait_);
+STATIC mp_obj_t badge_eink_busy_wait_() {
+#if defined(PIN_NUM_EPD_RESET)
+	badge_eink_dev_busy_wait();
+#endif
+	return mp_const_none;
+}
 
-
-/* PNG READER TEST */
+STATIC MP_DEFINE_CONST_FUN_OBJ_0(badge_eink_busy_wait_obj, badge_eink_busy_wait_);
 
 STATIC mp_obj_t badge_eink_png(mp_obj_t obj_x, mp_obj_t obj_y, mp_obj_t obj_filename)
 {
 	int x = mp_obj_get_int(obj_x);
 	int y = mp_obj_get_int(obj_y);
 
-	if (x >= BADGE_EINK_WIDTH || y >= BADGE_EINK_HEIGHT)
+	if (x >= BADGE_FB_WIDTH || y >= BADGE_FB_HEIGHT)
 	{
+		nlr_raise(mp_obj_new_exception_msg_varg(&mp_type_ValueError, "PNG too large!"));
 		return mp_const_none;
 	}
 
@@ -417,7 +523,7 @@ STATIC mp_obj_t badge_eink_png(mp_obj_t obj_x, mp_obj_t obj_y, mp_obj_t obj_file
 
 	uint32_t dst_min_x = x < 0 ? -x : 0;
 	uint32_t dst_min_y = y < 0 ? -y : 0;
-	int res = lib_png_load_image(pr, &badge_eink_fb[y * BADGE_EINK_WIDTH + x], dst_min_x, dst_min_y, BADGE_EINK_WIDTH - x, BADGE_EINK_HEIGHT - y, BADGE_EINK_WIDTH);
+	int res = lib_png_load_image(pr, &badge_fb[y * BADGE_FB_WIDTH + x], dst_min_x, dst_min_y, BADGE_FB_WIDTH - x, BADGE_FB_HEIGHT - y, BADGE_FB_WIDTH);
 	lib_png_destroy(pr);
 	if (is_bytes) {
 		lib_mem_destroy(reader_p);
@@ -503,10 +609,9 @@ STATIC mp_obj_t badge_eink_png_info(mp_obj_t obj_filename)
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_1(badge_eink_png_info_obj, badge_eink_png_info);
 
-/* END OF PNG READER TEST */
-
 
 /* Raw frame display */
+#if defined(PIN_NUM_EPD_RESET)
 STATIC mp_obj_t badge_eink_display_raw(mp_obj_t obj_img, mp_obj_t obj_flags)
 {
 	bool is_bytes = MP_OBJ_IS_TYPE(obj_img, &mp_type_bytes);
@@ -520,7 +625,7 @@ STATIC mp_obj_t badge_eink_display_raw(mp_obj_t obj_img, mp_obj_t obj_flags)
 	uint8_t *buffer = (uint8_t *)mp_obj_str_get_data(obj_img, &len);
 
 	int flags = mp_obj_get_int(obj_flags);
-	int expect_len = (flags & DISPLAY_FLAG_8BITPIXEL) ? BADGE_EINK_WIDTH*BADGE_EINK_HEIGHT : BADGE_EINK_WIDTH*BADGE_EINK_HEIGHT/8;
+	int expect_len = (flags & DISPLAY_FLAG_8BITPIXEL) ? BADGE_FB_WIDTH*BADGE_FB_HEIGHT : BADGE_FB_WIDTH*BADGE_FB_HEIGHT/8;
 	if (len != expect_len) {
 		mp_raise_msg(&mp_type_AttributeError, "First argument has wrong length");
 	}
@@ -531,7 +636,42 @@ STATIC mp_obj_t badge_eink_display_raw(mp_obj_t obj_img, mp_obj_t obj_flags)
 	return mp_const_none;
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_2(badge_eink_display_raw_obj, badge_eink_display_raw);
+#endif
 
+#if defined(I2C_ERC12864_ADDR)
+
+STATIC mp_obj_t badge_lcd_display_raw(mp_obj_t obj_img)
+{
+	bool is_bytes = MP_OBJ_IS_TYPE(obj_img, &mp_type_bytes);
+
+	if (!is_bytes) {
+		mp_raise_msg(&mp_type_AttributeError, "First argument should be a bytestring");
+	}
+
+	// convert the input buffer into a byte array
+	mp_uint_t len;
+	uint8_t *buffer = (uint8_t *)mp_obj_str_get_data(obj_img, &len);
+
+	if (len != BADGE_ERC12864_1BPP_DATA_LENGTH) {
+		mp_raise_msg(&mp_type_AttributeError, "First argument has wrong length");
+	}
+
+	// display the image directly
+	badge_erc12864_write(buffer);
+
+	return mp_const_none;
+}
+STATIC MP_DEFINE_CONST_FUN_OBJ_1(badge_lcd_display_raw_obj, badge_lcd_display_raw);
+
+STATIC mp_obj_t badge_lcd_set_rotation(mp_obj_t obj_rotation)
+{
+	badge_erc12864_set_rotation(mp_obj_get_int(obj_rotation));
+	return mp_const_none;
+}
+
+STATIC MP_DEFINE_CONST_FUN_OBJ_1(badge_lcd_set_rotation_obj, badge_lcd_set_rotation);
+
+#endif
 
 // Power (badge_power.h)
 
@@ -633,6 +773,54 @@ STATIC mp_obj_t badge_vibrator_activate_(mp_uint_t n_args, const mp_obj_t *args)
   return mp_const_none;
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(badge_vibrator_activate_obj, 1,1 ,badge_vibrator_activate_);
+#endif
+
+#if defined(I2C_DISOBEY_SAMD_ADDR)
+STATIC mp_obj_t badge_backlight(mp_uint_t n_args, const mp_obj_t *args) {
+  badge_disobey_samd_write_backlight(mp_obj_get_int(args[0]));
+  return mp_const_none;
+}
+STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(badge_backlight_obj, 1, 1, badge_backlight);
+
+STATIC mp_obj_t badge_led(mp_uint_t n_args, const mp_obj_t *args) {
+  badge_disobey_samd_write_led(mp_obj_get_int(args[0]),mp_obj_get_int(args[1]),mp_obj_get_int(args[2]),mp_obj_get_int(args[3]));
+  return mp_const_none;
+}
+STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(badge_led_obj, 4, 4, badge_led);
+
+STATIC mp_obj_t badge_buzzer(mp_uint_t n_args, const mp_obj_t *args) {
+  badge_disobey_samd_write_buzzer(mp_obj_get_int(args[0]),mp_obj_get_int(args[1]));
+  return mp_const_none;
+}
+STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(badge_buzzer_obj, 2, 2, badge_buzzer);
+
+STATIC mp_obj_t badge_off() {
+  badge_disobey_samd_write_off();
+  return mp_const_none;
+}
+STATIC MP_DEFINE_CONST_FUN_OBJ_0(badge_off_obj, badge_off);
+
+STATIC mp_obj_t badge_read_usb() {
+  return mp_obj_new_int(badge_disobey_samd_read_usb());
+}
+STATIC MP_DEFINE_CONST_FUN_OBJ_0(badge_read_usb_obj, badge_read_usb);
+
+STATIC mp_obj_t badge_read_battery() {
+  return mp_obj_new_int(badge_disobey_samd_read_battery());
+}
+STATIC MP_DEFINE_CONST_FUN_OBJ_0(badge_read_battery_obj, badge_read_battery);
+
+STATIC mp_obj_t badge_read_touch() {
+  return mp_obj_new_int(badge_disobey_samd_read_touch());
+}
+STATIC MP_DEFINE_CONST_FUN_OBJ_0(badge_read_touch_obj, badge_read_touch);
+
+STATIC mp_obj_t badge_read_state() {
+  return mp_obj_new_int(badge_disobey_samd_read_state());
+}
+STATIC MP_DEFINE_CONST_FUN_OBJ_0(badge_read_state_obj, badge_read_state);
+
+
 #endif
 
 
@@ -760,6 +948,10 @@ STATIC const mp_rom_map_elem_t badge_module_globals_table[] = {
     {MP_ROM_QSTR(MP_QSTR___name__), MP_ROM_QSTR(MP_QSTR_badge)},
 
     {MP_ROM_QSTR(MP_QSTR_init), MP_ROM_PTR(&badge_init_obj)},
+    
+#ifndef CONFIG_SHA_BPP_ENABLE
+    {MP_ROM_QSTR(MP_QSTR_remove_bpp_partition), MP_ROM_PTR(&remove_bpp_partition_obj)},
+#endif
 
     // I2C
     {MP_ROM_QSTR(MP_QSTR_i2c_read_reg), MP_ROM_PTR(&badge_i2c_read_reg_obj)},
@@ -774,6 +966,22 @@ STATIC const mp_rom_map_elem_t badge_module_globals_table[] = {
     {MP_ROM_QSTR(MP_QSTR_eink_init), MP_ROM_PTR(&badge_eink_init_obj)},
     {MP_ROM_QSTR(MP_QSTR_eink_deep_sleep), MP_ROM_PTR(&badge_eink_deep_sleep_obj)},
     {MP_ROM_QSTR(MP_QSTR_eink_wakeup), MP_ROM_PTR(&badge_eink_wakeup_obj)},
+    {MP_ROM_QSTR(MP_QSTR_eink_png), MP_ROM_PTR(&badge_eink_png_obj)},
+    {MP_ROM_QSTR(MP_QSTR_eink_png_info), MP_ROM_PTR(&badge_eink_png_info_obj)},
+    {MP_ROM_QSTR(MP_QSTR_png), MP_ROM_PTR(&badge_eink_png_obj)},
+    {MP_ROM_QSTR(MP_QSTR_png_info), MP_ROM_PTR(&badge_eink_png_info_obj)},
+#ifdef PIN_NUM_EPD_RESET
+    {MP_ROM_QSTR(MP_QSTR_eink_display_raw), MP_ROM_PTR(&badge_eink_display_raw_obj)},
+    {MP_ROM_QSTR(MP_QSTR_display_raw), MP_ROM_PTR(&badge_eink_display_raw_obj)},
+#endif
+    {MP_ROM_QSTR(MP_QSTR_eink_busy), MP_ROM_PTR(&badge_eink_busy_obj)},
+    {MP_ROM_QSTR(MP_QSTR_eink_busy_wait), MP_ROM_PTR(&badge_eink_busy_wait_obj)},
+
+#ifdef I2C_ERC12864_ADDR
+    {MP_ROM_QSTR(MP_QSTR_lcd_display_raw), MP_ROM_PTR(&badge_lcd_display_raw_obj)},
+    {MP_ROM_QSTR(MP_QSTR_display_raw), MP_ROM_PTR(&badge_lcd_display_raw_obj)},
+    {MP_ROM_QSTR(MP_QSTR_lcd_set_rotation), MP_ROM_PTR(&badge_lcd_set_rotation_obj)},
+#endif
 
     // Power
     {MP_OBJ_NEW_QSTR(MP_QSTR_power_init), (mp_obj_t)&badge_power_init_obj},
@@ -808,12 +1016,18 @@ STATIC const mp_rom_map_elem_t badge_module_globals_table[] = {
     {MP_OBJ_NEW_QSTR(MP_QSTR_vibrator_activate), (mp_obj_t)&badge_vibrator_activate_obj},
 #endif
 
-    {MP_ROM_QSTR(MP_QSTR_eink_busy), MP_ROM_PTR(&badge_eink_busy_obj)},
-    {MP_ROM_QSTR(MP_QSTR_eink_busy_wait), MP_ROM_PTR(&badge_eink_busy_wait_obj)},
+#if defined(I2C_DISOBEY_SAMD_ADDR)
+    {MP_OBJ_NEW_QSTR(MP_QSTR_backlight), (mp_obj_t)&badge_backlight_obj},
+    {MP_OBJ_NEW_QSTR(MP_QSTR_led), (mp_obj_t)&badge_led_obj},
+    {MP_OBJ_NEW_QSTR(MP_QSTR_buzzer), (mp_obj_t)&badge_buzzer_obj},
+    {MP_OBJ_NEW_QSTR(MP_QSTR_off), (mp_obj_t)&badge_off_obj},
+    {MP_OBJ_NEW_QSTR(MP_QSTR_read_usb), (mp_obj_t)&badge_read_usb_obj},
+    {MP_OBJ_NEW_QSTR(MP_QSTR_read_battery), (mp_obj_t)&badge_read_battery_obj},
+    {MP_OBJ_NEW_QSTR(MP_QSTR_read_touch), (mp_obj_t)&badge_read_touch_obj},
+    {MP_OBJ_NEW_QSTR(MP_QSTR_read_state), (mp_obj_t)&badge_read_state_obj},
+#endif
 
-    {MP_ROM_QSTR(MP_QSTR_eink_png), MP_ROM_PTR(&badge_eink_png_obj)},
-    {MP_ROM_QSTR(MP_QSTR_eink_png_info), MP_ROM_PTR(&badge_eink_png_info_obj)},
-    {MP_ROM_QSTR(MP_QSTR_eink_display_raw), MP_ROM_PTR(&badge_eink_display_raw_obj)},
+	{MP_OBJ_NEW_QSTR(MP_QSTR_rawrepl), (mp_obj_t)&rawrepl_obj},
 
 /*
     {MP_ROM_QSTR(MP_QSTR_display_picture), MP_ROM_PTR(&badge_display_picture_obj)},
