@@ -699,7 +699,7 @@ BADGE_COMPONENTS_O = $(addprefix $(PROJECT_PATH)/components/,\
 	ugfx-glue/gfx_mk.o \
 	ugfx-glue/gfx_userfs.o \
 	badge-ota/letsencrypt.o \
-	badge-ota/badge_ota_graphics.o \
+	graphics/graphics.o \
 	badge-ota/badge_ota.o \
 	badge-first-run/badge_first_run.o \
 	png/adler32.o \
