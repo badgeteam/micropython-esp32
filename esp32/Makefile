@@ -48,6 +48,7 @@ INC += -I../lib/timeutils
 INC += -I../../components/badge
 INC += -I../../components/ugfx-glue
 INC += -I../../components/graph
+INC += -I../../components/graphics
 INC += -I../../components/badge-ota
 INC += -I../../components/bpp-recv
 INC += -I../../components/bpp-if
