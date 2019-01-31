@@ -48,7 +48,7 @@ INC += -I../lib/timeutils
 INC += -I../../components/badge
 INC += -I../../components/ugfx-glue
 INC += -I../../components/graph
-INC += -I../../components/sha2017
+INC += -I../../components/badge-ota
 INC += -I../../components/bpp-recv
 INC += -I../../components/bpp-if
 INC += -I../../components/ed25519/include
@@ -697,9 +697,9 @@ BADGE_COMPONENTS_O = $(addprefix $(PROJECT_PATH)/components/,\
 	ugfx-glue/ginput_lld_toggle.o \
 	ugfx-glue/gfx_mk.o \
 	ugfx-glue/gfx_userfs.o \
-	sha2017/letsencrypt.o \
-	sha2017/sha2017_ota_graphics.o \
-	sha2017/sha2017_ota.o \
+	badge-ota/letsencrypt.o \
+	badge-ota/badge_ota_graphics.o \
+	badge-ota/badge_ota.o \
 	badge-first-run/badge_first_run.o \
 	png/adler32.o \
 	png/crc32.o \

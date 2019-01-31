@@ -28,7 +28,7 @@
 
 #include "modfreedomgfx_eink.h"
 #include <badge_eink.h>
-#include <badge_eink_fb.h>
+#include <badge_fb.h>
 #include <badge_input.h>
 
 extern bool ugfx_screen_flipped;
