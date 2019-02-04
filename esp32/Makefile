@@ -37,7 +37,7 @@ ifdef CONFIG_SHA_BADGE_V3_LITE
 FROZEN_MPY_DIR = modules_sha2017
 endif
 
-ifdef PROJECT_PATH
+ifdef CONFIG_DISOBEY
 FROZEN_MPY_DIR = modules_disobey2019
 endif
 
