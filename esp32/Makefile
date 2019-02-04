@@ -21,37 +21,40 @@ MICROPY_PY_BTREE = 1
 
 #FROZEN_DIR = scripts
 
-ifdef CONFIG_SHA_BADGE_V1
 FROZEN_MPY_DIR = modules_sha2017
-endif
+#FROZEN_MPY_DIR = modules_disobey2019
 
-ifdef CONFIG_SHA_BADGE_V2
-FROZEN_MPY_DIR = modules_sha2017
-endif
+#ifdef CONFIG_SHA_BADGE_V1
+#FROZEN_MPY_DIR = modules_sha2017
+#endif
 
-ifdef CONFIG_SHA_BADGE_V3
-FROZEN_MPY_DIR = modules_sha2017
-endif
+#ifdef CONFIG_SHA_BADGE_V2
+#FROZEN_MPY_DIR = modules_sha2017
+#endif
 
-ifdef CONFIG_SHA_BADGE_V3_LITE
-FROZEN_MPY_DIR = modules_sha2017
-endif
+#ifdef CONFIG_SHA_BADGE_V3
+#FROZEN_MPY_DIR = modules_sha2017
+#endif
 
-ifdef PROJECT_PATH
-FROZEN_MPY_DIR = modules_disobey2019
-endif
+#ifdef CONFIG_SHA_BADGE_V3_LITE
+#FROZEN_MPY_DIR = modules_sha2017
+#endif
 
-ifdef CONFIG_HACKERHOTEL_BADGE_V1
-FROZEN_MPY_DIR = modules_hackerhotel2019
-endif
+#ifdef CONFIG_DISOBEY
+#FROZEN_MPY_DIR = modules_disobey2019
+#endif
 
-ifdef CONFIG_HACKERHOTEL_BADGE_V0
-FROZEN_MPY_DIR = modules_hackerhotel2019
-endif
+#ifdef CONFIG_HACKERHOTEL_BADGE_V1
+#FROZEN_MPY_DIR = modules_hackerhotel2019
+#endif
 
-ifdef CONFIG_SHA_BADGE_NONE
-FROZEN_MPY_DIR = modules_generic
-endif
+#ifdef CONFIG_HACKERHOTEL_BADGE_V0
+#FROZEN_MPY_DIR = modules_hackerhotel2019
+#endif
+
+#ifdef CONFIG_SHA_BADGE_NONE
+#FROZEN_MPY_DIR = modules_generic
+#endif
 
 # include py core make definitions
 include ../py/py.mk
