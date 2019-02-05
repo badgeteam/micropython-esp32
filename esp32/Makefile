@@ -21,8 +21,9 @@ MICROPY_PY_BTREE = 1
 
 #FROZEN_DIR = scripts
 
-FROZEN_MPY_DIR = modules_sha2017
+#FROZEN_MPY_DIR = modules_sha2017
 #FROZEN_MPY_DIR = modules_disobey2019
+FROZEN_MPY_DIR = modules_hackerhotel2019
 
 #ifdef CONFIG_SHA_BADGE_V1
 #FROZEN_MPY_DIR = modules_sha2017
