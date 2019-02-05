@@ -779,9 +779,9 @@ $(BUILD)/firmware.bin: $(BUILD)/bootloader.bin $(BUILD)/partitions.bin $(BUILD)/
 	$(ECHO) "Create $@"
 	$(Q)$(PYTHON) makeimg.py $^ $@
 
-deploy: $(BUILD)/firmware.bin
-	$(ECHO) "Writing $^ to the board"
-	$(Q)$(ESPTOOL) --chip esp32 --port $(PORT) --baud $(BAUD) write_flash -z --flash_mode $(FLASH_MODE) --flash_freq $(FLASH_FREQ) 0x1000 $^
+deploy: $(BUILD)/application.bin
+	$(ECHO) "Writing full firmware to the board"
+	$(Q)$(ESPTOOL) --chip esp32 --port $(PORT) --baud $(BAUD) write_flash -z --flash_mode dio --flash_freq 80m --flash_size detect --flash_mode $(FLASH_MODE) --flash_freq $(FLASH_FREQ) 0x1000 ../../build/bootloader/bootloader.bin 0x8000 ../../build/partitions-16MB.bin 0x10000 build/application.bin
 
 flash: $(BUILD)/firmware.bin
 	$(ECHO) "Writing $^ to the board"
