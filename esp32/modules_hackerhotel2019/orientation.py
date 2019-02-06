@@ -18,13 +18,10 @@ def isPortrait(value=getDefault()):
 		return True
 	return False
 
-def sha2017():
+def landscape():
 	ugfx.orientation(0)
 
-def disobey2019():
-	ugfx.orientation(0)
-
-def hackerhotel2019():
+def portrait():
 	ugfx.orientation(90)
 
 def setDefault(value):

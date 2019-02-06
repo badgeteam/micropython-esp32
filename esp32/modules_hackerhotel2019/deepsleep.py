@@ -15,4 +15,4 @@ def start_sleeping(sleepTime=0):
 	machine.deepsleep(sleepTime)
 
 def reboot():
-    machine.deepsleep(1)
+    machine.deepsleep(2)

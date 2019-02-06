@@ -1,8 +1,7 @@
-import ugfx, esp, badge, deepsleep, term, easydraw, orientation
+import ugfx, esp, badge, deepsleep, term, easydraw
 
 def start_app(app, display = True):
 	if display:
-		orientation.default()
 		easydraw.msg(app, "Loading...", True)
 		term.header(True, "Loading application "+app+"...")
 	esp.rtcmem_write_string(app)

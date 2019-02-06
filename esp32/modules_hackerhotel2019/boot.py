@@ -2,6 +2,7 @@
 import badge, machine, esp, ugfx, sys, time
 badge.init()
 ugfx.init()
+ugfx.orientation(0)
 
 esp.rtcmem_write(0,0)
 esp.rtcmem_write(1,0)
