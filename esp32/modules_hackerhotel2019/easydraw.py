@@ -44,7 +44,7 @@ def msg(message, title = "Loading...", reset = False, wait = 0):
 		print(e)
 
 def nickname(y = 0, font = version.font_nickname_large, color = ugfx.BLACK):
-    nick = badge.nvs_get_str("owner", "name", 'H. Acker')
+    nick = badge.nvs_get_str("owner", "name", 'WELCOME TO DISOBEY')
     lines = lineSplit(nick, ugfx.width(), font)
     for i in range(len(lines)):
 		ugfx.string_box(0,y+15*i,ugfx.width(),15, lines[i], font, color, ugfx.justifyCenter)

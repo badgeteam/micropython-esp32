@@ -35,11 +35,8 @@ def get_NTP_time():
 def set_NTP_time():
 	import time
 	from machine import RTC
-	print("Setting time from NTP")
-
 	t = get_NTP_time()
 	if t is None:
-		print("Could not set time from NTP")
 		return False
 
 	tm = time.localtime(t)

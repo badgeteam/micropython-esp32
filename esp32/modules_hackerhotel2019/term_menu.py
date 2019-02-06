@@ -1,13 +1,14 @@
 import term, badge, deepsleep as ds, appglue as app, version
 
 class UartMenu():
-	def __init__(self, gts, pm, safe = False):
+	def __init__(self, gts, pm, safe = False, pol="Power off"):
 		self.gts = gts
 		self.menu = self.menu_main
 		if (safe):
 			self.menu = self.menu_safe
 		self.buff = ""
 		self.pm = pm
+		self.power_off_label = pol
 	
 	def main(self):
 		term.setPowerManagement(self.pm)
@@ -20,7 +21,7 @@ class UartMenu():
 		import shell
 	
 	def menu_main(self):
-		items = ["Python shell", "Apps", "Installer", "Settings", "About", "Check for updates", "Power off"]
+		items = ["Python shell", "Apps", "Installer", "Settings", "About", "Check for updates", self.power_off_label]
 		callbacks = [self.drop_to_shell, self.opt_launcher, self.opt_installer, self.menu_settings, self.opt_about, self.opt_ota_check, self.go_to_sleep]
 		message = "Welcome!\nYour badge is running firmware version "+str(version.build)+": "+version.name+"\n"
 		cb = term.menu("Main menu", items, 0, message)
@@ -42,6 +43,9 @@ class UartMenu():
 	def opt_configure_wifi(self):
 		app.start_app("wifi_setup_term")
 		
+	def opt_configure_orientation(self):
+		app.start_app("term_orientation")
+		
 	def opt_ota(self):
 		app.start_ota()
 		
@@ -56,8 +60,8 @@ class UartMenu():
 		
 	
 	def menu_settings(self):
-		items = ["Change nickname", "Configure WiFi", "Update firmware", "(Reclaim unused flash space)", "< Return to main menu"]
-		callbacks = [self.opt_change_nickname, self.opt_configure_wifi, self.opt_ota, self.opt_downloadmorerom, self.menu_main, self.menu_main]
+		items = ["Change nickname", "Configure WiFi", "Set default orientation", "Update firmware", "(Reclaim unused flash space)", "< Return to main menu"]
+		callbacks = [self.opt_change_nickname, self.opt_configure_wifi, self.opt_configure_orientation, self.opt_ota, self.opt_downloadmorerom, self.menu_main, self.menu_main]
 		cb = term.menu("Settings", items)
 		self.menu = callbacks[cb]
 	

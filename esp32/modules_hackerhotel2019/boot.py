@@ -39,22 +39,8 @@ try:
         ugfx.flush(ugfx.LUT_FULL)
 except BaseException as e:
     sys.print_exception(e)
-    import easydraw
-    easydraw.msg("A fatal error occured!","Still Crashing Anyway", True)
-    easydraw.msg("")
-
-    # if we started the splash screen and it is not the default splash screen,
-    # then revert to original splash screen.
     if splash == badge.nvs_get_str('boot', 'splash', 'splash') and splash != 'splash':
-        easydraw.msg("Disabling custom splash screen.")
-        easydraw.msg("")
         badge.nvs_erase_key('boot', 'splash')
-
-    easydraw.msg("Guru meditation:")
+    import easydraw
+    easydraw.msg("Guru meditation:","Fatal error", True)
     easydraw.msg(str(e))
-    easydraw.msg("")
-    easydraw.msg("Rebooting in 5 seconds...")
-    import time
-    time.sleep(5)
-    import appglue
-    appglue.home()

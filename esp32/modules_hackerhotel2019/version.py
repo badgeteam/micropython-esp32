@@ -4,7 +4,7 @@ build                  = 23
 name                   = "Work in progress"
 badge_name             = "Hackerhotel 2019"
 dialog_title           = "Alert"
-default_orientation    = 0
+default_orientation    = 90
 
 font_header            = "Roboto_Regular18"
 font_default           = "Roboto_Regular12"
@@ -20,4 +20,4 @@ btn_ok = ugfx.BTN_START
 btn_cancel = ugfx.BTN_B
 
 hatcheryurl             = "https://badge.team"
-otacheckurl             ="https://badge.team/firmware/version"
+otacheckurl             = "https://badge.team/firmware/version"

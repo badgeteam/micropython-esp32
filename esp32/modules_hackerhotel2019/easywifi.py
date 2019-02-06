@@ -1,9 +1,3 @@
-# File: easywifi.py
-# Version: 1
-# Description: Wrapper that makes using wifi simple
-# License: MIT
-# Authors: Renze Nicolai <renze@rnplus.nl>
-
 import time, network, badge, easydraw
 
 state = False
@@ -31,14 +25,14 @@ def enable(showStatus=True):
         nw = network.WLAN(network.STA_IF)
         if not nw.isconnected():
             nw.active(True)
-            ssid = badge.nvs_get_str('badge', 'wifi.ssid', 'SHA2017-insecure')
+            ssid = badge.nvs_get_str('badge', 'wifi.ssid', 'hackerhotel-insecure')
             password = badge.nvs_get_str('badge', 'wifi.password')
             if showStatus:
                 easydraw.msg("Connecting to '"+ssid+"'...")
             nw.connect(ssid, password) if password else nw.connect(ssid)
-            timeout = badge.nvs_get_u8('badge', 'wifi.timeout', 40)
+            timeout = badge.nvs_get_u8('badge', 'wifi.timeout', 5)
             while not nw.isconnected():
-                time.sleep(0.1)
+                time.sleep(1)
                 timeout = timeout - 1
                 if (timeout<1):
                     if showStatus:

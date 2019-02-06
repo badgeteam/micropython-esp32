@@ -4,23 +4,23 @@
 # License: MIT
 # Authors: Renze Nicolai <renze@rnplus.nl>
 
-import easywifi, easydraw, badge, time
+import easywifi, easydraw, badge, time, version
 
 def download_info():
     import urequests as requests
-    easydraw.msg("Checking for updates...")
+    easydraw.msg("Checking for firmware updates...")
     result = False
     try:
-        data = requests.get("https://badge.team/version")
+        data = requests.get(version.otacheckurl)
     except:
-        easydraw.msg("Error: could not download JSON!")
+        easydraw.msg("Error: can not fetch information.")
         time.sleep(5)
         return False
     try:
         result = data.json()
     except:
         data.close()
-        easydraw.msg("Error: could not decode JSON!")
+        easydraw.msg("")
         time.sleep(5)
         return False
     data.close()
@@ -34,7 +34,6 @@ def available(update=False):
 
         info = download_info()
         if info:
-            import version
             if info["build"] > version.build:
                 badge.nvs_set_u8('badge','OTA.ready',1)
                 return True
