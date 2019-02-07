@@ -151,7 +151,7 @@ STATIC mp_obj_ssl_socket_t *socket_new(mp_obj_t sock, struct ssl_args *args) {
     if (args->server_hostname.u_obj != mp_const_none) {
       const char *sni = mp_obj_str_get_str(args->server_hostname.u_obj);
       char *ptr;
-      badge_team_domain = ((ptr = strcasestr(sni, "badge.team")) != NULL && ptr[12] == 0);
+      badge_team_domain = ((ptr = strcasestr(sni, "badge.team")) != NULL && ptr[10] == 0);
       if (badge_team_domain) {
         printf("Validating certificate for: %s\n", sni);
       } else {
