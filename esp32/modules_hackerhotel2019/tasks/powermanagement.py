@@ -3,7 +3,7 @@ import virtualtimers, deepsleep, badge, sys
 requestedStandbyTime = 0
 onSleepCallback = None
 
-timeout = badge.nvs_get_u16('badge', 'sleep', 6000)
+timeout = badge.nvs_get_u16('badge', 'sleep', 10000) #Default to 10 seconds
 
 disabled = False
 enabled = False
