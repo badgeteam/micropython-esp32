@@ -147,19 +147,19 @@ STATIC mp_obj_ssl_socket_t *socket_new(mp_obj_t sock, struct ssl_args *args) {
       mp_raise_OSError(MP_EIO);
     }
 
-    bool sha2017_subdomain = false;
+    bool badge_team_domain = false;
     if (args->server_hostname.u_obj != mp_const_none) {
       const char *sni = mp_obj_str_get_str(args->server_hostname.u_obj);
       char *ptr;
-      sha2017_subdomain = ((ptr = strcasestr(sni, ".sha2017.org")) != NULL && ptr[12] == 0);
-      if (sha2017_subdomain) {
+      badge_team_domain = ((ptr = strcasestr(sni, "badge.team")) != NULL && ptr[12] == 0);
+      if (badge_team_domain) {
         printf("Validating certificate for: %s\n", sni);
       } else {
         printf("Warning: %s SSL certificate is not validated\n", sni);
       }
     }
 
-    if (sha2017_subdomain) {
+    if (badge_team_domain) {
         ret = mbedtls_x509_crt_parse_der(&o->cacert, letsencrypt, 856);
         if(ret < 0) {
             char errstr[256];
@@ -182,7 +182,7 @@ STATIC mp_obj_ssl_socket_t *socket_new(mp_obj_t sock, struct ssl_args *args) {
       mp_raise_OSError(MP_EIO);
     }
 
-    if (sha2017_subdomain) {
+    if (badge_team_domain) {
       mbedtls_ssl_conf_authmode(&o->conf, MBEDTLS_SSL_VERIFY_REQUIRED);
       mbedtls_ssl_conf_ca_chain(&o->conf, &o->cacert, NULL);
     } else {
