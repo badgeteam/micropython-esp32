@@ -1,7 +1,7 @@
 import ugfx
 
 build                  = 23
-name                   = "Work in progress"
+name                   = "Very Bad Things"
 badge_name             = "Hackerhotel 2019"
 dialog_title           = "Alert"
 default_orientation    = 90
@@ -20,4 +20,4 @@ btn_ok = ugfx.BTN_START
 btn_cancel = ugfx.BTN_B
 
 hatcheryurl             = "https://badge.team"
-otacheckurl             = "https://badge.team/firmware/version"
+otacheckurl             = "https://badge.team/firmware-hackerhotel2019"
