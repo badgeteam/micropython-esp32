@@ -93,6 +93,18 @@ INC += -I../../components/ed25519/include
 INC += -I../../components/redundancy
 INC += -I../../components/badge-first-run
 INC += -I../../components/png
+INC += -I../../components/audio_pipeline/include
+INC += -I../../components/audio_hal/board
+INC += -I../../components/audio_sal/include
+INC += -I../../components/audio_stream/include
+INC += -I../../components/esp_http_client/include
+INC += -I../../components/esp_http_client/lib/include
+INC += -I../../components/esp_peripherals/include
+INC += -I../../components/esp_peripherals/lib/blufi
+INC += -I../../components/tcp_transport/include
+INC += -I../../components/esp-adf-libs/esp_codec/include/codec
+INC += -I../../components/esp-adf-libs/esp_codec/include/processing
+INC += -I../../components/esp-tls
 INC += -I../../main
 INC += -I../../ugfx/src/gdisp/mcufont
 INC += -I../../ugfx
@@ -191,6 +203,7 @@ SRC_C = \
 	modsocket.c \
 	modesp.c \
 	modbpp.c \
+	modaudio.c \
 	modbadge.c \
 	modugfx.c \
 	modfreedomgfx.c \
@@ -324,6 +337,8 @@ ESPIDF_ESP32_O = $(addprefix $(ESPCOMP)/esp32/,\
 	ets_timer_legacy.o \
 	esp_err_to_name.o \
 	dbg_stubs.o \
+	spiram.o \
+	spiram_psram.o \
 	)
 
 ESPIDF_PTHREAD_O = $(addprefix $(ESPCOMP)/pthread/,\
@@ -683,6 +698,28 @@ ESPIDF_WPA_SUPPLICANT_O = $(addprefix $(ESPCOMP)/wpa_supplicant/,\
 	port/os_xtensa.o \
 	)
 
+ESPADF_O = $(addprefix $(PROJECT_PATH)/components/,\
+	audio_pipeline/audio_pipeline.o \
+	audio_pipeline/audio_element.o \
+	audio_pipeline/audio_event_iface.o \
+	audio_pipeline/ringbuf.o \
+	audio_sal/audio_mem.o \
+	audio_stream/fatfs_stream.o \
+	audio_stream/http_stream.o \
+	audio_stream/i2s_stream.o \
+	esp_http_client/esp_http_client.o \
+	esp_http_client/lib/http_header.o \
+	esp_http_client/lib/http_auth.o \
+	esp_http_client/lib/http_utils.o \
+	tcp_transport/transport.o \
+	tcp_transport/transport_ssl.o \
+	tcp_transport/transport_tcp.o \
+	tcp_transport/transport_utils.o \
+	esp-tls/esp_tls.o \
+	esp_peripherals/periph_wifi.o \
+	esp_peripherals/esp_peripherals.o \
+	)
+
 OBJ_ESPIDF =
 OBJ_ESPIDF += $(addprefix $(BUILD)/, $(ESPIDF_NEWLIB_O))
 OBJ_ESPIDF += $(addprefix $(BUILD)/, $(ESPIDF_DRIVER_O))
@@ -713,6 +750,7 @@ OBJ_ESPIDF += $(addprefix $(BUILD)/, $(ESPIDF_WPA_SUPPLICANT_O))
 OBJ_ESPIDF += $(addprefix $(BUILD)/, $(ESPIDF_APP_UPDATE_O))
 OBJ_ESPIDF += $(addprefix $(BUILD)/, $(ESPIDF_BOOTLOADER_O))
 OBJ_ESPIDF += $(addprefix $(BUILD)/, $(ESPIDF_SDMMC_O))
+OBJ_ESPIDF += $(addprefix $(BUILD)/, $(ESPADF_O))
 
 ####################
 # Badge magic
@@ -722,6 +760,7 @@ BADGE_COMPONENTS_O = $(addprefix $(PROJECT_PATH)/components/,\
 	badge/badge_base.o \
 	badge/badge_eink.o \
 	badge/badge_i2c.o \
+	badge/badge_spi.o \
 	badge/badge_leds.o \
 	badge/badge_mpr121.o \
 	badge/badge_disobey_samd.o \
@@ -780,9 +819,9 @@ $(BUILD)/firmware.bin: $(BUILD)/bootloader.bin $(BUILD)/partitions.bin $(BUILD)/
 	$(ECHO) "Create $@"
 	$(Q)$(PYTHON) makeimg.py $^ $@
 
-deploy: $(BUILD)/firmware.bin
-	$(ECHO) "Writing $^ to the board"
-	$(Q)$(ESPTOOL) --chip esp32 --port $(PORT) --baud $(BAUD) write_flash -z --flash_mode $(FLASH_MODE) --flash_freq $(FLASH_FREQ) 0x1000 $^
+deploy: $(BUILD)/application.bin
+	$(ECHO) "Writing full firmware to the board"
+	$(Q)$(ESPTOOL) --chip esp32 --port $(PORT) --baud $(BAUD) write_flash -z --flash_mode dio --flash_freq 80m --flash_size detect --flash_mode $(FLASH_MODE) --flash_freq $(FLASH_FREQ) 0x1000 ../../build/bootloader/bootloader.bin 0x8000 ../../build/partitions-16MB.bin 0x10000 build/application.bin
 
 flash: $(BUILD)/firmware.bin
 	$(ECHO) "Writing $^ to the board"
@@ -820,6 +859,7 @@ APP_LD_ARGS += -lgcov
 APP_LD_ARGS += $(ESPCOMP)/newlib/lib/libc.a
 APP_LD_ARGS += $(ESPCOMP)/newlib/lib/libm.a
 APP_LD_ARGS += $(ESPCOMP)/esp32/libhal.a
+APP_LD_ARGS += $(PROJECT_PATH)/components/esp-adf-libs/esp_codec/lib/libesp_codec.a
 APP_LD_ARGS += $(BADGE_LIBS)
 APP_LD_ARGS += -L$(ESPCOMP)/esp32/lib -lcore -lnet80211 -lmesh -lphy -lrtc -lpp -lwpa -lwpa2 -lwps -lsmartconfig -lcoexist
 APP_LD_ARGS += $(OBJ)
