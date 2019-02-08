@@ -336,6 +336,8 @@ ESPIDF_ESP32_O = $(addprefix $(ESPCOMP)/esp32/,\
 	ets_timer_legacy.o \
 	esp_err_to_name.o \
 	dbg_stubs.o \
+	spiram.o \
+	spiram_psram.o \
 	)
 
 ESPIDF_PTHREAD_O = $(addprefix $(ESPCOMP)/pthread/,\
